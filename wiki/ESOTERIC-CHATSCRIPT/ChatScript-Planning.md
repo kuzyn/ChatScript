@@ -1,6 +1,8 @@
 # Planning with ChatScript
 
 > © Bruce Wilcox, gowilcox@gmail.com
+
+
 > Revision 7/3/2015 CS 5.5
 
 

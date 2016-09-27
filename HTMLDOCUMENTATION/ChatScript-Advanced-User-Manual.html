@@ -10,7 +10,10 @@
 <body>
 <h1 id="chatscript-advanced-users-manual">ChatScript Advanced User's Manual</h1>
 <blockquote>
-<p>© Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com Revision 8/13/2016 cs6.8</p>
+<p>© Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com</p>
+</blockquote>
+<blockquote>
+<p>Revision 9/25/2016 cs6.84</p>
 </blockquote>
 <ul>
 <li><a href="ChatScript-Advanced-User-Manual.html#review-overview-of-how-cs-works">Review</a></li>
@@ -48,7 +51,7 @@
 <p>Second are passive strings like &quot;meat-loving plants&quot;.</p>
 <p>Third are active strings (which you haven't read about yet) like <code>^&quot;I like $value&quot;</code>. Active strings involve references to functions or data inside them and execute when used to convert their results into a passive string with appropriate value substitutions.</p>
 <p>Other languages would name a CS active string a format string, and have to pass it to a function like sprintf along with the arguments to embed into the format. CS just directly embeds the arguments in the string and any attempt to use the active string implicitly invokes the equivalent of sprintf.</p>
-<p>User variables also come in permanent and transient forms. <strong>Permanent variables</strong> start with a single <code>$</code> and are preserved across user interactions (are saved and restored from disk). <strong>Transient variables</strong> start with <code>$$</code> and completely disappear when a user interaction happens (are not saved to disk).</p>
+<p>User variables also come in permanent and transient forms. <strong>Permanent variables</strong> start with a single <code>$</code> and are preserved across user interactions (are saved and restored from disk). You can see and alter their value from anywhere. <strong>Transient variables</strong> start with <code>$$</code> and completely disappear when a user interaction happens (are not saved to disk). You can see and alter their value from anywhere. <strong>Local variables</strong> (described later) start with <code>$_</code> and completely disappear when a user interaction happens (are not saved to disk). You can see and alter their value only within the topic or outputmacro they are used.</p>
 <h3 id="facts">Facts</h3>
 <p>ChatScript supports structured triples of data called facts, which can be found by querying for them. The 3 fields of a fact are either text strings or fact references to other facts. So you might have a fact like</p>
 <pre><code>(I eat &quot;meat-loving plants&quot;)</code></pre>
@@ -446,6 +449,8 @@ u: (I love you today when)</code></pre>
 <p>What happens is this- when the system detects the transfer of control (the <code>^reuse</code> call), if there is output pending it is finished off and packaged for the user. The current stream is cleared, and the rule is erased (if allowed to be). Then the <code>^reuse()</code> happens. Even if it fails, this rule has produced output and been erased.</p>
 <p>Assuming the reuse doesn't fail, it will have sent whatever it wants into the stream and been packaged up for the user. The rest of the message for this rule now goes into the output stream <em>and so do you</em> and then that too is finished off and packaged for the user. The rule is erased because it has output in the stream when it ends (but it was already erased so it doesn't matter).</p>
 <p>So, output does two things. It queues up tokens to send to the user, which may be discarded if the rule ultimately fails. And it can call out to various functions. Things those functions may do are permanent, not undone if the rule later fails.</p>
+<h2 id="output-cannot-have-rules-in-it">Output cannot have rules in it</h2>
+<p>Output script cannot emed another rule inside it. Output is executed during the current volley whereas rules (like rejoinder rules) may be executed in a different volley. Therefore this is illegal: <code>u: GREETING (~emohello)</code> <code>if ($username)</code> <code>{</code> <code>Hi  $username!</code> <code>}</code> <code>else</code> <code>{</code> <code>I don't believe we've met, what's your name?</code> <code>a: (_*) So your name is '_0?</code> <code>}</code> and needs to be written like this: <code>u: GREETING (~emohello)</code> <code>if ($username)</code> <code>{</code> <code>Hi  $username!</code> <code>}</code> <code>else</code> <code>{</code> <code>I don't believe we've met, what's your name?</code> <code>}</code> <code>a: (_*) So your name is '_0?</code> Of course you don't want the rejoinder triggered if you can from the <code>if</code> side, so you'd also need to add a call to <code>^setnorejoinder</code> from inside it.</p>
 <h2 id="formatted-double-quotes-activeformat-string">Formatted double quotes (Active/Format String)</h2>
 <p>Because you can intermix program script with ordinary output words, ChatScript normally autoformats output code. But programming languages allow you to control your output with format strings and ChatScript is no exception.</p>
 <p>In the case of ChatScript, the active string <code>^&quot;xxx&quot;</code> string is a format string. The system will remove the <code>^</code> and the quotes and put it out exactly as you have it, except, it will substitute variables (which you learn about shortly) with their values and it will accept <code>[ ]</code> <code>[ ]</code> choice blocks. And will allow function calls. You can't do assignment statements or loops or if statements.</p>
@@ -643,7 +648,12 @@ $$tmp(34)</code></pre>
 <p>which would create the name $washing.</p>
 <p>Now suppose you wanted to set that variable to some number representing the turn after which you might return.</p>
 <pre><code>$$tmp = 25</code></pre>
-<p>doesn't work. It wipes out the <span class="math inline">$washing value of `$</span><span class="math inline">$tmp` and replaces it with `25`. You can set indirectly through `$</span><span class="math inline">$tmp` using function notation `^`, e.g. ``` ^$</span><span class="math inline">$tmp = 25 ``` The above says take the value of `$</span>$tmp<code>, treat it as the name of a variable,  and assign into it. Which means it does the equivalent of ``` $washing = 25 ``` If you want to an indirect value back, you can't do: ``` $$val = $$tmp ``` because that just passes the name of</code><span class="math inline">$washing` over to `$</span>$val`. Instead you do indirection again:</p>
+<p>doesn't work. It wipes out the <span class="math inline">$washing value of `$</span>$tmp<code>and replaces it with</code>25`.</p>
+<p>You can set indirectly through <code>$$tmp</code> using function notation <code>^$$tmp</code> The above says take the value of <code>$$tmp</code>, treat it as the name of a variable, and assign into it. Which means it does the equivalent of</p>
+<pre><code>$washing = 25</code></pre>
+<p>If you want to an indirect value back, you can't do:</p>
+<pre><code>$$val = $$tmp</code></pre>
+<p>because that just passes the name of <code>$washing</code> over to <code>$$val</code>. Instead you do indirection again:</p>
 <pre><code>$$val = ^$$tmp # $$val becomes 25</code></pre>
 <p>Indirection works with values that are user variables and with values that are match variables or quoted match variables.</p>
 <p>Many routines automatically evaluate a variable when using it as an argument, like <code>^gambit($$tmp)</code>. But if you want the value of the variable it represents, then you need to evaluate it another time.</p>
@@ -663,6 +673,10 @@ _0 = $$stuff</code></pre>
 <p>When you assign onto a match variable from a user variable, you make both original and canonical values of the match variable the same, and the positional data is set to 0.</p>
 <pre><code>_0 = _10</code></pre>
 <p>This is a transfer from one match variable to another, so no data is lost</p>
+<h2 id="json-dotted-notation-for-variables">Json dotted notation for variables</h2>
+<p>If a variable holds a JSON object value, you can directly set and get from fields of that object using dotted notation. This must be a fixed static fieldname you give- <code>$myvar.$myfield</code> is illegal. Dotted notation is cleaner and faster than <code>^jsonpath</code> and <code>jsonobjectinsert</code> and for get, has the advantage that it never fails, it only returns null if it can't find the field. On the other hand, assignment fails if the path does not contain a json object at some level.</p>
+<pre><code>$x = $$$obj.name.value.data.side 
+$$$obj.name.value.data.side = 7</code></pre>
 <h1 id="out-of-band-communication">Out of band Communication</h1>
 <p>ChatScript can neither see nor act, but it can interact with systems that do. The convention is that out-of-band information occurs at the start of input or output, and is encased in <code>[ ]</code>.</p>
 <p>ChatScript does not attempt to postag and parse any input sentence which begins with <code>[</code> and has a closing <code>]</code>. It will automatically not try to spellcheck that part or perform any kind of merge (date, number, propername). In fact, the <code>[…]</code> will be split off into its own sentence. You can use normal CS rules to detect and react to incoming oob messaging. E.g, input like this</p>
@@ -1010,17 +1024,14 @@ loop()
 <p>Just for reference, for our most advanced bot, the actual max values used were: max dict: 346 max fact: 689 max text: 38052.</p>
 <p>And the maximum rules executed to find an answer to an input sentence was 8426 (not that you control or care). Typical rules executed for an input sentence was 500-2000 rules. For example, add 1000 to the dict and fact used amounts and 10 (kb) to the string space to have enough normal working room.</p>
 <h2 id="output-options">Output options</h2>
-<p><code>output=nnn</code> limits output line length for a bot to that amount (forcing as needed). 0 is unlimited.</p>
+<p><code>output=nnn</code> limits output line length for a bot to that amount (forcing crnl as needed). 0 is unlimited.</p>
 <h2 id="file-options">File options</h2>
 <p><code>livedata=xxx</code> – name relative or absolute path to your own private LIVEDATA folder. Do not add trailing / on this path. Recommended is you use <code>RAWDATA/yourbotfolder/LIVEDATA</code> to keep all your data in one place.</p>
 <p>You can have your own live data, yet use ChatScripts default <code>LIVEDATA/SYSTEM</code> and <code>LIVEDATA/ENGLISH</code> by providing paths to the <code>system=</code> and <code>english=</code> parameters as well as the <code>livedata=</code> parameter.</p>
 <p><code>users=xxx</code> – name relative or absolute path to where you want the USERS folder to be. Do not add trailing /. <br><code>logs=xxx</code> – name relative or absolute path to where you want the LOGS folder to be. Do not add trailing /.</p>
 <p>Other options: <code>trace</code> – turn on all tracing.</p>
 <p><code>redo</code> – see documentation for :redo in debugging manual</p>
-<p><code>userfacts=n</code> limit a user file to saving only the n most recently created facts of a user (this does not include facts stored in fact sets). Overridden if the user has <code>$cs_userfactlimit</code> set to some value. <br><code>userlog</code> - Store a user-bot log in USERS directory (default). <br><code>nouserlog</code> - Don't store a user-bot log. <br><code>login=xxxx</code> - The same as you would name when asked for a login, this avoids having to ask for it. Can be <code>login=george</code> or <code>login=george:harry</code> or whatever.</p>
-<p><code>build0=filename</code> runs <code>:build</code> on the filename as level0 and exits with 0 on success or 4 on failure. <br><code>build1=filename</code> runs :build on the filename as level1 and exits with 0 on success or 4 on failure. Eg. ChatScript <code>build0=files0.txt</code> will rebuild the usual level 0.</p>
-<p><code>debug=:xxx</code> xxx runs the given debug command and then exits. Useful for <code>:trim</code>, for example or more specific <code>:build</code> commands.</p>
-<p><code>param=xxxxx</code> data to be passed to your private code</p>
+<p><code>userfacts=n</code> limit a user file to saving only the n most recently created facts of a user (this does not include facts stored in fact sets). Overridden if the user has <code>$cs_userfactlimit</code> set to some value. <br><code>userlog</code> - Store a user-bot log in USERS directory (default). <br><code>nouserlog</code> - Don't store a user-bot log. <br><code>login=xxxx</code> - The same as you would name when asked for a login, this avoids having to ask for it. Can be <code>login=george</code> or <code>login=george:harry</code> or whatever. <br><code>build0=filename` runs `:build` on the filename as level0 and exits with 0 on success or 4 on failure. &lt;br&gt;`build1=filename` runs :build on the filename as level1 and exits with 0 on success or 4 on failure. Eg. ChatScript `build0=files0.txt` will rebuild the usual level 0. &lt;br&gt;</code>debug=:xxx<code>xxx runs the given debug command and then exits.  Useful for</code>:trim<code>, for example or more specific</code>:build<code>commands. &lt;br&gt;``param=xxxxx</code> data to be passed to your private code <br><code>login=xxxxx` initial user id (bypass asking you for user) &lt;br&gt;</code>encrypt=xxxxx<code>data evailable to encrpytion code &lt;br&gt;``decrypt=xxxxx</code> data evailable to decrpytion code <br>`<code>bootcmd=xxx</code> runs this command string before CSBOOT is run use it to trace the boot process</p>
 <h2 id="bot-variables-1">Bot variables</h2>
 <p>You can create predefined bot variables by simply naming permanent variables on the command line, using V to replace $ (since Linux shell scripts don't like $). Eg.</p>
 <p><br>ChatScript Vmyvar=fatcat <br>ChatScript Vmyvar=&quot;tony is here&quot; <br>ChatScript &quot;Vmyvar=tony is here&quot;</p>

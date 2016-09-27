@@ -1,6 +1,8 @@
 # ChatScript External Communications
 
 > © Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
+
+
 > Revision 1/21/2016 cs6.1a
 
 ChatScript is fine for a chatbot that does not depend on the outer world. But if you need to control an

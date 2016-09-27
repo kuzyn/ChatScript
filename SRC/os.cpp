@@ -1,4 +1,5 @@
 #include "common.h"
+static char logLastCharacter = 0;
 
 bool showDepth = false;
 char serverLogfileName[200];				// file to log server to
@@ -20,6 +21,8 @@ bool showmem = false;
 int filesystemOverride = NORMALFILES;
 bool inLog = false;
 char* testOutput = NULL;					// testing commands output reroute
+static char encryptServer[200];
+static char decryptServer[200];
 
 // buffer information
 #define MAX_BUFFER_COUNT 22
@@ -229,17 +232,111 @@ void InitUserFiles()
 	filesystemOverride = NORMALFILES;
 }
 
+#ifndef DISCARDJSON 
+FunctionResult JSONOpenCode(char* buffer);
+
+static size_t CleanupCryption(char* buffer)
+{
+	// clean up answer data
+	char* answer = strchr(buffer,'x');
+	if (!answer) 
+	{
+		*buffer = 0;
+		return 0;
+	}
+	int realsize = jsonOpenSize - 4 - (answer-buffer);
+	memmove(buffer,answer+4,realsize); // drop head data {"datavalues":{"x":"hello world"}}
+	realsize -= 3;
+	buffer[realsize] = 0;	// remove trailing data
+	return realsize;
+}
+
+static int JsonOpenCryption(char* buffer, size_t size, char* server)
+{
+	// prepare body for transfer to server to look like this:
+	// {"datavalues": {"x": "..."}} 
+	sprintf(buffer+size,"\"}}"); // add suffix to data
+	char url[50];
+	sprintf(url,"{\"datavalues\": {\"");
+	int headerlen = strlen(url);
+	memmove(buffer+headerlen,buffer,size+3);
+	strncpy(buffer,url,headerlen);
+
+	// set up call to json open
+	char header[500];
+	strcpy(header,"Content-Type: application/json");
+	int oldArgumentIndex = callArgumentIndex;
+	int oldArgumentBase = callArgumentBase;
+	callArgumentBase = callArgumentIndex - 1;
+	callArgumentList[callArgumentIndex++] =   "direct";
+	callArgumentList[callArgumentIndex++] =    "POST";
+	sprintf(url,server,loginID);
+	callArgumentList[callArgumentIndex++] =    url;
+	callArgumentList[callArgumentIndex++] =    (char*) buffer;
+	callArgumentList[callArgumentIndex++] =    header;
+
+	// do it
+	trace = -1;
+	echo = true;
+	FunctionResult result = JSONOpenCode((char*) buffer); 
+	callArgumentIndex = oldArgumentIndex;	 
+	callArgumentBase = oldArgumentBase;
+	if (result != NOPROBLEM_BIT) return 0;
+	return CleanupCryption((char*) buffer);
+}
+
+static size_t Decrypt(void* buffer,size_t size, size_t count, FILE* file)
+{
+	return JsonOpenCryption((char*) buffer, size * count,decryptServer);
+}
+
+static size_t Encrypt(const void* buffer, size_t size, size_t count, FILE* file)
+{
+	return JsonOpenCryption((char*) buffer, size * count,encryptServer);
+}
+#endif
+
+void EncryptInit(char* params) // required
+{
+	*encryptServer = 0;
+	if (params) strcpy(encryptServer,params);
+#ifndef DISCARDJSON 
+	if (*encryptServer) userFileSystem.userEncrypt = Encrypt;
+#endif
+}
+
+void DecryptInit(char* params) // required
+{
+	*decryptServer = 0;
+	if (params) strcpy(decryptServer,params);
+#ifndef DISCARDJSON 
+	if (*decryptServer) userFileSystem.userDecrypt = Decrypt;
+#endif
+}
+
+void EncryptRestart() // required
+{
+#ifndef DISCARDJSON
+	if (encryptServer && *encryptServer) userFileSystem.userEncrypt = Encrypt; // reestablish encrypt/decrypt bindings
+	if (decryptServer && *decryptServer) userFileSystem.userDecrypt = Decrypt; // reestablish encrypt/decrypt bindings
+#endif
+}
+
 size_t DecryptableFileRead(void* buffer,size_t size, size_t count, FILE* file)
 {
 	size_t len = userFileSystem.userRead(buffer,size,count,file);
-	if (userFileSystem.userDecrypt) userFileSystem.userDecrypt(buffer,size,count,file);
+	if (userFileSystem.userDecrypt) return userFileSystem.userDecrypt(buffer,1,len,file); // can revise buffer
 	return len;
 }
 
 size_t EncryptableFileWrite(void* buffer,size_t size, size_t count, FILE* file)
 {
-	if (userFileSystem.userEncrypt) userFileSystem.userEncrypt(buffer,size,count,file);
-	return userFileSystem.userWrite(buffer,size,count,file);
+	if (userFileSystem.userEncrypt) 
+	{
+		size_t msgsize = userFileSystem.userEncrypt(buffer,size,count,file); // can revise buffer
+		return userFileSystem.userWrite(buffer,1,msgsize,file);
+	}
+	else return userFileSystem.userWrite(buffer,size,count,file);
 }
 
 void CopyFile2File(const char* newname,const char* oldname, bool automaticNumber)
@@ -962,6 +1059,11 @@ void ChangeDepth(int value,char* where)
 	}
 }
 
+bool LogEndedCleanly()
+{
+	return (logLastCharacter == '\n' || !logLastCharacter);
+}
+
 unsigned int Log(unsigned int channel,const char * fmt, ...)
 {
 	int channelID;
@@ -999,7 +1101,6 @@ unsigned int Log(unsigned int channel,const char * fmt, ...)
 	if ((channel == SERVERLOG) && server && !serverLog)  return id; // not logging server data
 	if (channel == BUGLOG && server && !serverLog)  return id; // not logging server data
 
-	static char last = 0;
 	static int priordepth = 0;
 	char* logbase = logmainbuffer;
 
@@ -1026,10 +1127,10 @@ unsigned int Log(unsigned int channel,const char * fmt, ...)
 	else if (channel > 1000) channel = STDTRACELOG; //   force result code to indent new line
 
 	//   channels above 100 will indent when prior line not ended
-	if (channel >= STDTRACELOG && last != '\\') //   indented by call level and not merged
+	if (channel >= STDTRACELOG && logLastCharacter != '\\') //   indented by call level and not merged
 	{ //   STDTRACELOG 101 is std indending characters  201 = attention getting
-		if (last == 1 && globalDepth == priordepth) {} // we indented already
-		else if (last == 1 && globalDepth > priordepth) // we need to indent a bit more
+		if (logLastCharacter == 1 && globalDepth == priordepth) {} // we indented already
+		else if (logLastCharacter == 1 && globalDepth > priordepth) // we need to indent a bit more
 		{
 			for (int i = priordepth+1; i < globalDepth; i++)
 			{
@@ -1040,7 +1141,7 @@ unsigned int Log(unsigned int channel,const char * fmt, ...)
 		}
 		else 
 		{
-			if (last != '\n') 
+			if (logLastCharacter != '\n') 
 			{
 				*at++ = '\r'; //   close out this prior thing
 				*at++ = '\n';
@@ -1131,9 +1232,9 @@ unsigned int Log(unsigned int channel,const char * fmt, ...)
     *at = 0;
     va_end(ap); 
 
-	last = (at > logbase) ? *(at-1) : 0; //   ends on NL?
-	if (fmt && !*fmt) last = 1; // special marker 
-	if (last == '\\') *--at = 0;	//   dont show it (we intend to merge lines)
+	logLastCharacter = (at > logbase) ? *(at-1) : 0; //   ends on NL?
+	if (fmt && !*fmt) logLastCharacter = 1; // special marker 
+	if (logLastCharacter == '\\') *--at = 0;	//   dont show it (we intend to merge lines)
 	logUpdated = true; // in case someone wants to see if intervening output happened
 	size_t bufLen = at - logbase;
 	inLog = true;

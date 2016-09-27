@@ -1,6 +1,8 @@
 # ChatScript Document Reader
 
 > © Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
+
+
 > Revision 7/3/2014 cs5.5
 
 * [Reading Documents](ChatScript-Document-Reader.md#reading-documents)

@@ -1,7 +1,9 @@
 # ChatScript System Functions Manual
 
 > © Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
-> Revision 8/13/2016 cs6.8
+
+
+> Revision 9/25/2016 cs6.84
 
 * [Topic Functions](ChatScript-System-Functions-Manual.md#topic-functions)
 * [Marking Functions](ChatScript-System-Functions-Manual.md#marking-functions)
@@ -285,6 +287,11 @@ Given a topic name, return the control bits for that topic.
 The bits are mapped in dictionary_system.h as `TOPIC_*`.
 
 
+### `^sleep`( `milliseconds` )
+This stalls the engine for that many milliseconds. If this is a server, the server is unavailable until sleep is
+done. Use with care. A good use is when starting up a server instance and the boot process involves reading from
+an API. If your machine runs 30 instances of ChatScript launched at once (to use max CPU), then all of them
+hitting the same API at once may be bad for the API and forcing a randomized sleep based on processid is a good use.
 
 # Marking Functions
 
@@ -833,15 +840,8 @@ and `^myfunc` returns a factset name, you have done the equivalent of
 ```
 which means copy the elements of set 19 into set 0.
 
-Note that `^return()` and `^return(null)` are not the same. An empty string is not completely
-the same as nuThe first passes an if test, and the second does not. For `^function` calling `^return()`
-```
-if ( ^function()) {this always works}
-```
-but for `^function` calling `^return(null)`
-````
-if (^function()) { # like a $var, this fails if the function returns null}
-```
+Note that `^return()` and `^return(null)` are treated the same. An empty string is returned. This is
+similar to assigning a variable by saying `$var = null` which assigns the empty string.
 
 
 ### `^addcontext`( topic label )
@@ -1174,6 +1174,11 @@ Just add `*` after your final path, eg
 ^jsonpath(.name[4]* $$obj)
 ```
 
+If you need to handle the full range of legal keys in json, you can use text string notation like this
+```
+^jsonpath(."st. helen".data $tmp)
+```
+
 # Word Manipulation Functions
 
 ### `^burst`( {count once} data-source burst-character-string )
@@ -1237,6 +1242,8 @@ A negative start is a backwards offset from end.
 Find case sensitive substring within source+offset and return offset starting immediately after match. 
 Useful for data extraction using `^popen` and `^tcpopen` when combined with `^extract`. 
 `$$findtext_start` is bound to the actual start of the match. 
+`$$findtext_word` is bound to the word index in which the match was found where one or more blanks separate words.
+Indexing starts at 1 (same as sentence positional notation).
 
 An optional fourth argument `insensitive` will match insensitively. Failing to match will generate a rule failure. If the source or substring contains an `_`, these will be converted to blanks before execution, to allow that
 or the space notation to be considered equivalent (unless your source or substring is
@@ -1254,6 +1261,16 @@ The optional third argument, if it's `canonical`, it will match the canonical fo
 Concatenates them all together, putting the result
 into the output stream. If the first argument is `AUTOSPACE`, it will put a single space
 between each of the joined arguments automatically.
+
+### `^actualinputrange`( start end )
+Given the starting and ending word positions of an original input (what CS had after tokenization but
+before adjustments), this returns the range of where the words arose  in the actual input. The
+return is a range whose start is shifted 8 bits left and ORed with the end position.
+
+### `^originalinputrange`( start end )
+Given the starting and ending word positions of an actual input (what CS sees after adjustments and what you
+normally pattern match on), this returns the range of where the words came from in the original input. The
+return is a range whose start is shifted 8 bits left and ORed with the end position.
 
 ### `^properties`( word )
 Returns the 64bit properties of a word or fail-rule if the word is not

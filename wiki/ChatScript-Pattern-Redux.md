@@ -1,6 +1,8 @@
 # ChatScript Pattern Redux
 
 > © Bruce Wilcox, gowilcox@gmail.com
+
+
 > Revision 7/16/2016 cs6.6.1
 
 Pattern matching information was introduced in the Beginner manual and expanded in the Advanced

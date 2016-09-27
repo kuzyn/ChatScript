@@ -1,6 +1,8 @@
 # ChatScript MongoDB
 
 > © Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
+
+
 > Revision 8/27/2016 cs6.8a
 
 ChatScript ships with code and WINDOWS libraries for accessing Mongo but you need a database

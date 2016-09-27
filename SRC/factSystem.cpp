@@ -542,7 +542,7 @@ FACT* CreateFact(FACTOID_OR_MEANING subject, FACTOID_OR_MEANING verb, FACTOID_OR
 }
 
 bool ExportFacts(char* name, int set,char* append)
-{
+{ 
 	if (set < 0 || set > MAX_FIND_SETS) return false;
 	if ( *name == '"')
 	{
@@ -575,7 +575,7 @@ bool ExportFacts(char* name, int set,char* append)
 		FreeBuffer();
 		return false;
 	}
-	EncryptableFileWrite(base,1,(buffer-base),out);
+	EncryptableFileWrite(base,1,(buffer-base),out); // can change content of buffer
 	userFileSystem.userClose(out);
 	FreeUserCache();
 	FreeBuffer();
@@ -628,7 +628,7 @@ FunctionResult ExportJson(char* name, char* jsonitem, char* append)
 	FILE* out = userFileSystem.userCreate(name); // user ltm file
 	if (!out) return FAILRULE_BIT;
 
-	char* buffer = GetFreeCache();
+	char* buffer = GetFreeCache(); // filesize limit
 	ExportJson1(jsonitem, buffer);
 	EncryptableFileWrite(buffer,1,strlen(buffer),out);
 	userFileSystem.userClose(out);
@@ -842,7 +842,8 @@ bool ImportFacts(char* buffer,char* name, char* set, char* erase, char* transien
 		else if (*word == '(')
 		{
 			ChangeDepth(1, readBuffer);
-			FACT* G = ReadFact(readBuffer,0);
+			char* ptr = readBuffer;
+			FACT* G = ReadFact(ptr,0);
 			ChangeDepth(-1, readBuffer);
 			if (!G) 
 			{

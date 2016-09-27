@@ -1,6 +1,8 @@
 # ChatScript Pos-Parser Manual
 
 > © Bruce Wilcox, gowilcox@gmail.com
+
+
 > Revision 7/24/2016 cs6.7
 
 How to support non-English languages at end of manual.

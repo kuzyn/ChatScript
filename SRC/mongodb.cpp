@@ -423,7 +423,7 @@ size_t mongouserRead(void* buffer,size_t size, size_t count, FILE* file)
 }
 
 size_t mongouserWrite(const void* buffer,size_t size, size_t count, FILE* file)
-{// writes topic files, export files, server log files
+{// writes topic files, export files
 	// data is already mongo safe, except for possible cr/nl 
 	char* mongoBuffer = (char*) buffer;
 	ProtectNL(mongoBuffer); // replace cr/nl
@@ -453,8 +453,6 @@ void MonogoUserFilesInit() // start mongo as fileserver
 		userFileSystem.userClose = mongouserClose;
 		userFileSystem.userRead = mongouserRead;
 		userFileSystem.userWrite = mongouserWrite;
-		userFileSystem.userDecrypt = NULL;
-		userFileSystem.userEncrypt = NULL;
 		filesystemOverride = MONGOFILES;
 	}
 	else 

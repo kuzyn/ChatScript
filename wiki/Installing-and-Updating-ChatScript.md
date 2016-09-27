@@ -1,6 +1,8 @@
 # Installing and Updating ChatScript
 
 > © Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
+
+
 > Revision 12/23/2015 cs5.91
 
 # Installing (Windows, Mac, Linux) 

@@ -10,7 +10,10 @@
 <body>
 <h1 id="chatscript-debugging-manual">ChatScript Debugging Manual</h1>
 <blockquote>
-<p>© Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com Revision 8/5/2016 cs6.7b</p>
+<p>© Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com</p>
+</blockquote>
+<blockquote>
+<p>Revision 9/25/2016 cs6.84</p>
 </blockquote>
 <p>You’ve written script. It doesn’t work. Now what? Now you need to debug it, fix it, and recompile it. Debugging is mostly a matter of tracing what the system does testpaand finding out where it doesn’t do what you expected. Debugging mostly done by issuing commands to the engine, as opposed to chatting.</p>
 <p>If the system detects bugs during execution, they go into <code>TMP/bugs.txt</code> You can erase the entire contents of the TMP directory a:trny time you want to. But odds are this is not your problem. Debugging generally requires use of some :xxxx commands. I don't always remember them all, so at times I might simply say</p>
@@ -250,6 +253,18 @@ RAWDATA/simpletopic.top # things we can chat about
 <p>list all user functions being traced</p>
 <h3 id="tracedtopics"><code>:tracedtopics</code></h3>
 <p>list all topics being traced</p>
+<h3 id="time"><code>:time</code></h3>
+<p>measures milliseconds taken by topics and functions for performance analysis. Just type :time to see keywords.</p>
+<p><code>:time all</code> turns on timing everywhere</p>
+<p>It is similar to <code>:trace</code> (using several of the same keywords) and can be used to limit to just certain topics/rules and ^macros. A simple <code>:time</code> will list those keywords.</p>
+<p>Note the time output is only shown in the user’s log file and is not echoed to the console.</p>
+<p>By default items that don’t take any time will not be shown, but this can be overridden by <code>:time always</code></p>
+<h3 id="notime"><code>:notime</code></h3>
+<p>disables timing for some topic or functions</p>
+<h3 id="timedtopics"><code>:timedtopics</code></h3>
+<p>lists what topics are currently being timed.</p>
+<h3 id="timedfunctions"><code>:timedfunctions</code></h3>
+<p>list functions currently being timed</p>
 <h3 id="retry"><code>:retry</code></h3>
 <h3 id="retry-this-is-my-new-input"><code>:retry</code> <em>This is my new input</em></h3>
 <p>:retry tells the system to rerun the most recent input on the state of the system a moment ago, and retry it. It should do exactly what it did before, but this time if you have turned on tracing it will trace it.</p>

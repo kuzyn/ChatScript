@@ -585,6 +585,20 @@ static char* STrace(char* value)
 	return systemValue;
 }
 
+static char* SPID(char* value)
+{
+	static char hold[50] = ".";
+	if (value) return AssignValue(hold,value);
+	if (*hold != '.') return hold;
+	if (!trace) return "0";
+#ifdef LINUX
+	sprintf(systemValue,(char*)"%d",getpid());
+#else
+	sprintf(systemValue,(char*)"%d",0);
+#endif
+	return systemValue;
+}
+
 ////////////////////////////////////////////////////
 /// USER INPUT
 ////////////////////////////////////////////////////
@@ -936,6 +950,7 @@ SYSTEMVARIABLE sysvars[] =
 	{ (char*)"%actualtopic",SactualTopic,(char*)"Current  topic executing (including system or nostay)"}, 
 	{ (char*)"%topic",Stopic,(char*)"Current interesting topic executing (not system or nostay)"}, 
 	{ (char*)"%trace",STrace,(char*)"Numeric value of trace flag"}, 
+	{ (char*)"%pid",SPID,(char*)"Process id of this instance (linux)"}, 
 
 	{ (char*)"\r\n---- Build variables",0,(char*)""},
 	{ (char*)"%dict",Sdict,(char*)"String - when dictionary was built"}, 

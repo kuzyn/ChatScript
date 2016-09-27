@@ -1,6 +1,8 @@
 # ChatScript PostgreSQL
 
 > © Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
+
+
 > Revision 4/30/2016 cs6.54
 
 ChatScript ships with code and WINDOWS libraries for accessing PostgreSQL but you need a database

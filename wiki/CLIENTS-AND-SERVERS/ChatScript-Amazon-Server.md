@@ -1,6 +1,8 @@
 # ChatScript - Setting up an Amazon EC2 Server
 
 > © Bruce Wilcox, gowilcox@gmail.com
+
+
 > Revision 8/13/2013 cs6.8
 
 If you want to make your chatbot visible on the web, you need a server. As it turns out, for low traffic,

@@ -1,6 +1,8 @@
 # ChatScript Overview of Input to Output
 
 >© Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
+
+
 >Revision 7/18/2014 cs4.4e
 
 While there are many natural language tools and engines out there, ChatScript is unlike most (or all) of

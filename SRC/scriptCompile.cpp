@@ -126,15 +126,15 @@ static char* WriteDisplay(char* pack)
 	{
 		*pack++ = '(';
 		*pack++ = ' ';
-		printf("    Locals: ");
+		Log(STDUSERLOG,"    Locals: ");
 		for (int i = 0; i < displayIndex; ++i)
 		{
-			printf("%s, ",display[i]);
+			Log(STDUSERLOG,"%s, ",display[i]);
 			strcpy(pack,display[i]);
 			pack += strlen(pack);
 			*pack++ = ' ';
 		}
-		printf("\r\n");
+		Log(STDUSERLOG,"\r\n");
 		*pack++ = ')';
 		*pack++ = ' ';
 		*pack = 0;
@@ -889,14 +889,16 @@ char* ReadSystemToken(char* ptr, char* word, bool separateUnderscore) //   how w
 	}
 
 	// break apart math on variables eg $value+2 as a service to the user
-	if (*word == '%'  || *word == '$') // cannot use _ here as that will break memorization pattern tokens
+	if ((*word == '%'  || *word == '$') && word[1]) // cannot use _ here as that will break memorization pattern tokens
 	{
 		char* at = word + 1;
 		if (at[1] == '$' || at[1] == '_') ++at;	// skip over 2ndary marker
+		--at;
 		while (LegalVarChar(*++at) );  // find end of initial word
 		if (*word == '$' && *at == '.' && LegalVarChar(at[1]))// allow $x.y as a complete name
 		{
-			while (LegalVarChar(*++at) );  // find end of field name
+			while (LegalVarChar(*++at) || *at == '.' );  // find end of field name sequence
+			if (*(at-1) == '.') --at; // tailing period cannot be part of it
 		}  
 		if (*at && IsPunctuation(*at) & ARITHMETICS && *at != '=')
 		{
@@ -1524,6 +1526,8 @@ static char* ReadCall(char* name, char* ptr, FILE* in, char* &data,bool call, bo
 	//   ptr is just after the ^name -- user can make a call w/o ^ in name but its been patched. Or this is function argument
 	char reuseTarget1[SMALL_WORD_SIZE];
 	char reuseTarget2[SMALL_WORD_SIZE];
+	char* startit = data;
+	
 	*reuseTarget2 = *reuseTarget1  = 0;	//   in case this turns out to be a ^reuse call, we want to test for its target
 	char argset[ARGSETLIMIT+1][SMALL_WORD_SIZE];
 	char word[MAX_WORD_SIZE];
@@ -1643,6 +1647,7 @@ static char* ReadCall(char* name, char* ptr, FILE* in, char* &data,bool call, bo
 					char* arg = mydata;
 					ptr = ReadCall(word,ptr,in,mydata,*nextToken == '(',false);
 					*mydata = 0;
+
 					if (argumentCount < ARGSETLIMIT) 
 					{
 						if (strlen(arg) < SMALL_WORD_SIZE) strcpy(argset[++argumentCount],arg);
@@ -1770,8 +1775,9 @@ static char* ReadCall(char* name, char* ptr, FILE* in, char* &data,bool call, bo
 	int oldspell = spellCheck;
 	spellCheck = 0;
 	ReadOutput(hold,NULL,data,NULL,NULL,D,false); // block implicit calls because createfact( xxx xxx ( )) looks like a call
+	*data = 0;
+		
 	spellCheck = oldspell;
-
 	patternContext = oldContext;
 	
 	*data++ = ')'; //   outer layer generates trailing space
@@ -4985,7 +4991,6 @@ int ReadTopicFiles(char* name,unsigned int build,int spell)
 	ClearUserVariables();
 	compiling = true;
 	errorIndex = warnIndex = hasWarnings = hasErrors = 0;
-	echo = true;
 	
 	//   store known pattern words in pattern file that we want to recognize (not spellcorrect on input)
 	char filename[SMALL_WORD_SIZE];

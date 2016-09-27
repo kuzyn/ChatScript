@@ -1,0 +1,1345 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[unicode=true]{hyperref}
+\hypersetup{
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{longtable,booktabs}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+\date{}
+
+\begin{document}
+
+\section{ChatScript System Variables and Engine-defined
+Concepts}\label{chatscript-system-variables-and-engine-defined-concepts}
+
+\begin{quote}
+© Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
+\end{quote}
+
+\begin{quote}
+Revision 9/25/2016 cs6.84
+\end{quote}
+
+\begin{itemize}
+\tightlist
+\item
+  \href{ChatScript-System-Variables-and-Engine-defined-Concepts.md\#engine-defined-concepts}{Engine-defined
+  Concepts}
+\item
+  \href{ChatScript-System-Variables-and-Engine-defined-Concepts.md\#system-variables}{System
+  Variables}
+\item
+  \href{ChatScript-System-Variables-and-Engine-defined-Concepts.md\#control-over-input}{Control
+  over Input}
+\item
+  \href{ChatScript-System-Variables-and-Engine-defined-Concepts.md\#interchange-variables}{Interchange
+  Variables}
+\end{itemize}
+
+\section{Engine-defined concepts}\label{engine-defined-concepts}
+
+In addition to concepts defined in script files, the system
+automatically defines a bunch of dictionary-based sets as well as
+dynamically computed concept members.
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+\begin{minipage}[b]{0.22\columnwidth}\raggedright\strut
+set\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\raggedright\strut
+description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}web\_url}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+word is a web url\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}email\_url}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+word is an email address\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}kindergarten}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+word learned early in life\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}grade1\_2}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+word learned in these grades\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}grade3\_4}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+word learned in these grades\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}grade\_5-6}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+word learned in these grades. Unmarked words are learned even
+later\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}utf8}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+word has nonascii characters\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}daynumber}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+word could be a number of a day in a month\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}yearnumber}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+word could be the number of a recent year\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}dateinfo}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+phrase is month day year of some kind\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}kelvin}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+temperature marker\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}celcius}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+temperature marker\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}fahrenheit}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+temperature marker\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}twitter\_name}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+twitter user name\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\raggedright\strut
+\texttt{\textasciitilde{}hashtag\_label}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+twitter topic reference\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\subsection{\texorpdfstring{Interjections, ``discourse acts'', and
+concept
+sets}{Interjections, discourse acts, and concept sets}}\label{interjections-discourse-acts-and-concept-sets}
+
+Some words and phrases have interpretations based on whether they are at
+sentence start or not. E.g., \emph{good day, mate} and \emph{It is a
+good day} are different for \emph{good day}.
+
+Likewise sure and I am sure are different. Words that have a different
+meaning at the start of a sentence are commonly called interjections.
+
+In ChatScript these are defined by the
+\texttt{livedata/interjections.txt} file. In addition, the file augments
+this concept with ``discourse acts'', phrases that are like an
+interjection. All interjections and discourse acts map to concept sets,
+which come thru as the user input instead of what they wrote. For
+example yes and sure and of course are all treated as meaning the
+discourse act of agreement in the interjections file. So you don't see
+yes, I will go coming out of the engine.
+
+The interjections file will remap that to the sentence
+\textasciitilde{}yes, breaking off that into its own sentence, followed
+by I will go as a new sentence.
+
+These generic interjections (which are open to author control via
+interjections.txt) are:
+\texttt{\textasciitilde{}yes},\texttt{\textasciitilde{}no},\texttt{\textasciitilde{}emomaybe},\texttt{\textasciitilde{}emohello},\texttt{\textasciitilde{}emogoodbye},\texttt{\textasciitilde{}emohowzit},\texttt{\textasciitilde{}emothanks},
+\texttt{\textasciitilde{}emolaugh},\texttt{\textasciitilde{}emohappy},\texttt{\textasciitilde{}emosad},\texttt{\textasciitilde{}emosurprise},
+\texttt{\textasciitilde{}emomisunderstand},
+\texttt{\textasciitilde{}emoskeptic},\texttt{\textasciitilde{}emoignorance},\texttt{\textasciitilde{}emobeg},
+\texttt{\textasciitilde{}emobored},
+\texttt{\textasciitilde{}emopain},\texttt{\textasciitilde{}emoangry},
+\texttt{\textasciitilde{}emocurse},\texttt{\textasciitilde{}emodisgust},\texttt{\textasciitilde{}emoprotest},
+\texttt{\textasciitilde{}emoapology},\texttt{\textasciitilde{}emomutual}
+
+Because all interjections at the start of a sentence are broken off into
+their own sentence, this kind of pattern does not work:
+
+\begin{verbatim}
+u: (~yes _*)
+\end{verbatim}
+
+You cannot capture the rest of the sentence here, because it will be
+part of the next sentence instead. This means interjections act somewhat
+differently from other concepts.
+
+If you use a word in a pattern which may get remapped on input, the
+script compiler will issue a warning. Likely you should use the remapped
+name instead.
+
+The following concepts are triggered by exactly repeating either the
+chatbot or oneself (to a repeat count of how often repeated). Repeats
+are within a recency window of about 20 volleys.
+\texttt{\textasciitilde{}repeatme},
+\texttt{\textasciitilde{}repeatinput1},
+\texttt{\textasciitilde{}repeatinput2},
+\texttt{\textasciitilde{}repeatinput3},
+\texttt{\textasciitilde{}repeatinput4},
+\texttt{\textasciitilde{}repeatinput5},
+\texttt{\textasciitilde{}repeatinput6},
+
+\subsection{POS (Part of Speech) Tags}\label{pos-part-of-speech-tags}
+
+Words will have pos-tags attached, specififying both generic and
+specific tag attributes, eg., \texttt{\textasciitilde{}noun} and
+\texttt{\textasciitilde{}noun\_singular}.
+
+\subsubsection{Genric Specifics}\label{genric-specifics}
+
+\texttt{\textasciitilde{}noun},
+\texttt{\textasciitilde{}noun\_singular},
+\texttt{\textasciitilde{}noun\_plural},
+\texttt{\textasciitilde{}noun\_proper\_singular},
+\texttt{\textasciitilde{}noun\_proper\_plural},
+\texttt{\textasciitilde{}noun\_gerund},
+\texttt{\textasciitilde{}noun\_number},
+\texttt{\textasciitilde{}noun\_infinitive},
+\texttt{\textasciitilde{}noun\_omitted\_adjective},
+\texttt{\textasciitilde{}verb}, \texttt{\textasciitilde{}verb\_present},
+\texttt{\textasciitilde{}verb\_present\_3ps},
+\texttt{\textasciitilde{}verb\_infinitive},
+\texttt{\textasciitilde{}verb\_present\_participle},
+\texttt{\textasciitilde{}verb\_past},
+\texttt{\textasciitilde{}verb\_past\_participle},
+\texttt{\textasciitilde{}aux\_verb},
+\texttt{\textasciitilde{}aux\_verb\_present},
+\texttt{\textasciitilde{}aux\_verb\_past},
+\texttt{\textasciitilde{}aux\_verb\_future}
+(\texttt{\textasciitilde{}aux\_verb\_tenses}),
+\texttt{\textasciitilde{}aux\_be}, \texttt{\textasciitilde{}aux\_have},
+\texttt{\textasciitilde{}aux\_do}
+
+Auxilliary verbs are segmented into normal ones and special ones. Normal
+ones give their tense directly. Special ones give their root word. The
+tense of the be/have/do verbs can be had via \texttt{\^{}properties()}
+and testing for verb tenses
+
+\texttt{\textasciitilde{}adjective},
+\texttt{\textasciitilde{}adjective\_normal},
+\texttt{\textasciitilde{}adjective\_number},
+\texttt{\textasciitilde{}adjective\_noun},
+\texttt{\textasciitilde{}adjective\_participle}
+
+Adjectives in comparative form will also have
+\texttt{\textasciitilde{}more\_form} or
+\texttt{\textasciitilde{}most\_form}. \texttt{\textasciitilde{}adverb},
+\texttt{\textasciitilde{}adverb\_normal}
+
+Adverbs in comparative form will also have
+\texttt{\textasciitilde{}more\_form} or
+\texttt{\textasciitilde{}most\_form}. \texttt{\textasciitilde{}pronoun},
+\texttt{\textasciitilde{}pronoun\_subject},
+\texttt{\textasciitilde{}pronoun\_object},
+\texttt{\textasciitilde{}conjunction\_bits},
+\texttt{\textasciitilde{}conjunction\_coordinate} ,
+\texttt{\textasciitilde{}conjunction\_subordinate},
+\texttt{\textasciitilde{}determiner\_bits},
+\texttt{\textasciitilde{}determiner},
+\texttt{\textasciitilde{}pronoun\_possessive},
+\texttt{\textasciitilde{}predeterminer},
+\texttt{\textasciitilde{}possessive} (covers `and 's at end of word),
+\texttt{\textasciitilde{}to\_infinitive} (``to'' when used before a noun
+infinitive), \texttt{\textasciitilde{}preposition},
+\texttt{\textasciitilde{}particle} (free-floating preposition tied to
+idiomatic verb), \texttt{\textasciitilde{}comma},
+\texttt{\textasciitilde{}quote} (covers' and " when not embedded in a
+word), \texttt{\textasciitilde{}paren} (covers opening and closing
+parens), \texttt{\textasciitilde{}foreign\_word} (some unknown word),
+\texttt{\textasciitilde{}there\_existential} (the word there used
+existentially),
+
+In addition to normal generic kinds of pos tags, words which are serving
+a pos-tag role different from their putative word type are marked as
+members of the major tag they act as part of. E.g,
+
+\texttt{\textasciitilde{}noun\_gerund} -- verb used as a
+\textasciitilde{}noun \texttt{\textasciitilde{}noun\_infinitive} -- verb
+used as a \textasciitilde{}noun
+\texttt{\textasciitilde{}noun\_omitted\_adjective} -- an adjective used
+as a collective noun (eg the beautiful are kind)
+
+\texttt{\textasciitilde{}adjectival\_noun} (noun used as adjective like
+bank ``bank teller'') \texttt{\textasciitilde{}adjective\_participle}
+(verb participle used as an adjective)
+
+For \texttt{\textasciitilde{}noun\_gerund} in \emph{I like swimming} the
+verb gerund \emph{swimming} is treated as a noun (hence called
+noun-gerund) but retains verb sense when matching keywords tagged with
+part-of-speech (i.e., it would match \texttt{swim\textasciitilde{}v} as
+well as \texttt{swim\textasciitilde{}n}).
+
+\texttt{\textasciitilde{}number} is not a part of speech, but is
+comprise of \texttt{\textasciitilde{}noun\_number} (a normal number
+value like \emph{17} or \emph{seventeen}) and
+\texttt{\textasciitilde{}adjective\_number} (also a normal numeral value
+and also \texttt{\textasciitilde{}placenumber}) like first.
+
+To can be a preposition or it can be special. When used in the
+infinitive phrase To go, it is marked
+\texttt{\textasciitilde{}to\_infinitive} and is followed by
+\texttt{\textasciitilde{}noun\_infinitive}.
+
+\texttt{\textasciitilde{}verb\_infinitive} refers to a match on the
+infinitive form of the verb (I hear John sing or I will sing).
+
+\texttt{\textasciitilde{}There\_existential} refers to the use of where
+not involving location, meaning the existence of, as in There is no
+future.
+
+\texttt{\textasciitilde{}Particle} refers to a preposition piece of a
+compound verb idiom which allows being separated from the verb. If you
+say \emph{I will call off the meeting}, call\_off is the composite verb
+and is a single token. But if you split it as in \emph{I will call the
+meeting off}, then there are two tokens. The original form of the verb
+will be call and the canonical form of the verb will be call\_off, while
+the free-standing off will be labeled
+\texttt{\textasciitilde{}particle}.
+
+\texttt{\textasciitilde{}verb\_present} will be used for normal present
+verbs not in third person singular like I walk and
+\texttt{\textasciitilde{}verb\_present\_3ps} will be used for things
+like he walks
+
+\texttt{\textasciitilde{}possesive} refers to `s and ` that indicate
+possession, while possessive pronouns get their own labeling
+\texttt{\textasciitilde{}pronoun\_possessive}.
+
+\texttt{\textasciitilde{}pronoun\_subject} is a pronoun used as a
+subject (like he) while pronoun\_object refers to objective form like
+(him)
+
+Individual words serve roles in the parse of a sentence, which are
+retrievable. These include:
+
+\texttt{\textasciitilde{}mainsubject},
+\texttt{\textasciitilde{}mainverb},
+\texttt{\textasciitilde{}mainindirect},
+\texttt{\textasciitilde{}maindirect},
+\texttt{\textasciitilde{}subject2}, \texttt{\textasciitilde{}verb2},
+\texttt{\textasciitilde{}indirectobject2},
+\texttt{\textasciitilde{}object2},
+\texttt{\textasciitilde{}subject\_complement} -- (adjective object of
+sentence involving linking verb),
+\texttt{\textasciitilde{}object\_complement} -- (2ndary noun or
+infinitive verb filling modifying mainobject or object2),
+\texttt{\textasciitilde{}conjunct\_noun},
+\texttt{\textasciitilde{}conjunct\_verb},
+\texttt{\textasciitilde{}conjunct\_adjective},
+\texttt{\textasciitilde{}conjunct\_adverb}
+\texttt{\textasciitilde{}conjunct\_phrase},
+\texttt{\textasciitilde{}conjunct\_clause},
+\texttt{\textasciitilde{}conjunct\_sentence},
+\texttt{\textasciitilde{}postnominalAdjective} - adjective occuring
+AFTER the noun it modified, \texttt{\textasciitilde{}reflexive} -
+(reflexive pronouns), \texttt{\textasciitilde{}not},
+\texttt{\textasciitilde{}address} -- noun used as addressee of sentence,
+\texttt{\textasciitilde{}appositive} -- noun restating and modifying
+prior noun, \texttt{\textasciitilde{}absolutephrase} -- special phrase
+describing whole sentence, \texttt{\textasciitilde{}omittedtimeprep} --
+modified time word used as phrase but lacking preposition (Next tuesday
+I will go), \texttt{\textasciitilde{}phrase} -- a prepositional phrase
+start (except, \texttt{\textasciitilde{}clause} -- a subordinate clause
+start, \texttt{\textasciitilde{}verbal} -- a verb phrase.
+
+\section{System Variables}\label{system-variables}
+
+The system has some predefined variables which you can generally test
+and use but not normally assign to. These all begin with \texttt{\%} .
+Ones that are reasonable to set are written in bold underline. Boolean
+values are always \texttt{1} or \texttt{null} on returns. \texttt{1} or
+\texttt{0} if you are setting them.
+
+\subsection{Date \& Time \& Numbers}\label{date-time-numbers}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+\begin{minipage}[b]{0.12\columnwidth}\raggedright\strut
+variable\strut
+\end{minipage} & \begin{minipage}[b]{0.61\columnwidth}\raggedright\strut
+description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%date}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+one or two digit day of the month\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%day}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+Sunday, etc\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%daynumber}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+0-6 where 0 = Sunday\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%fulltime}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+seconds representing the current time and date (Unix epoch time)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%timenumbers}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+completely consistent full time info in numbers that you can do
+\texttt{\_0\ =\ \^{}burst(\%timenumbers)}to get \texttt{\_0} =seconds
+(2digit) \texttt{\_1}=minutes (2digit) \texttt{\_2}=hours (2digit)
+\texttt{\_3}=dayinweek(0-6 Sunday=0) \texttt{\_4}=dateinmonth (1-31)
+\texttt{\_5}=month(0-11 January=0) \texttt{\_6}=year. You need to get it
+simultaneously if you want to do accurate things with current time,
+since retrieving \%hour \%minute separately allows time to change
+between calls\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%leapyear}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+boolean if current year is a leap year\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%daylightsavings}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+boolean if current within daylight savings\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%minute}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+0-59\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%month}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+1-12 (January = 1)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%monthname}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+January, etc\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%second}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+0-59\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%volleytime}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+number of seconds of computation since volley input started\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%time}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+hh:mm in military 24-hour time\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%week}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+1-5 (week of the month)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%year}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+e.g., 2011\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%rand}\strut
+\end{minipage} & \begin{minipage}[t]{0.61\columnwidth}\raggedright\strut
+get a random number from 1 to 100 inclusive\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+Time and date information are normally local, relative to the system
+clock of the machine CS is running on. See \$cs\_utcoffset for adjusting
+time based on relationship to utc (e.g your server is in Virginia and
+you are in Colorado).
+
+\subsection{User Input}\label{user-input}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+\begin{minipage}[b]{0.12\columnwidth}\raggedright\strut
+variable\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\raggedright\strut
+description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%bot}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+current bot responding\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%revisedinput}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean is current input from \^{}input not direct from user\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%command}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean was the user input a command\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%foreign}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean is bulk of the sentence composed of foreign words\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%impliedyou}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean was the user input having you as implied subject\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%input}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+the count of the number of volleys this user has made ever\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%ip}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+ip address supplied\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%length}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+the length in tokens of the current sentence\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%more}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean is there another sentence after this\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%morequestion}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean is there a ? or question word in the pending sentences\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%originalinput}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+all sentences user passed into volley, before adjusted in any way except
+OOB data is stripped off\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%originalsentence}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+the current sentence after tokenization but before any adjustments\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%parsed}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean was current input parsed successfully\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%question}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean was the user input a question -- same as ? in a pattern\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%quotation}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean is current input a quotation\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%sentence}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean does it seem like a sentence (subject/verb or command)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%tense}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+past , present, or future simple tense (present perfect is a past
+tense)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%user}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+user login name supplied\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%userfirstline}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+value of \%input that is at the start of this conversation start\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%userinput}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean is the current input from the user (vs the chatbot)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%voice}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+active or passive on current input\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\subsection{Chatbot Output}\label{chatbot-output}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+\begin{minipage}[b]{0.12\columnwidth}\raggedright\strut
+variable\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\raggedright\strut
+description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%inputrejoinder}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+rule tag of any pending rejoinder for input or 0 if none\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%lastoutput}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+the text of the last generated response for the current volley\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%lastquestion}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean did last output end in a ?\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%outputrejoinder}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+rule tag if system set a rejoinder for its current output or 0\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%response}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+number of responses that have been generated for this sentence\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\subsection{System variables}\label{system-variables-1}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+\begin{minipage}[b]{0.12\columnwidth}\raggedright\strut
+variable\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\raggedright\strut
+description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%all}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean is the :all flag on? (:all to set)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%document}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean is :document running\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%fact}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Numeric value most recent fact id\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%freetext}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+kb of available text space\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%freedict}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+number of unused dictionary words\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%freefact}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+number of unused facts\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%maxmatchvariables}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+highest number of \_match variables, currently 20\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%maxfactsets}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+highest number of @factsets, currently 20\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%host}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+name of the current host machine or ``local''\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%regression}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean is the regression flag on\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%server}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Boolean is the system running in server mode\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%rule}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+get a tag to the current executing rule. Can be used in place of a
+label\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%topic}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+name of the current ``real'' topic . if control is currently in a topic
+or called from a topic which is not system or nostay, then that is the
+topic. Otherwise the most recent pending topic is found\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%actualtopic}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+literally the current topic being processed (system or not)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%trace}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Numeric value of the trace flag (:trace to set)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%httpresponse}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+return code of most recent \^{}jsonopen call\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\raggedright\strut
+\texttt{\%pid}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+Linux process id or 0 for other systems\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\subsection{Build data+}\label{build-data}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+variable & description\tabularnewline
+\midrule
+\endhead
+\texttt{\%dict} & date/time the dictionary was built\tabularnewline
+\texttt{\%engine} & date/time the engine was compiled\tabularnewline
+\texttt{\%os} & os invovled (linux windows mac ios)\tabularnewline
+\texttt{\%script} & date/time build1 was compiled\tabularnewline
+\texttt{\%version} & engine version number\tabularnewline
+\bottomrule
+\end{longtable}
+
+You actually can assign to any of them. This will override them and make
+them return what you tell them to and is a particularly BAD thing to do
+if this is running on a server since it affects all users (unless you
+reset the variable at the end of the volley. Assigning a period to a
+variable resets it). Typically one does this as a temporary assignment
+in a \#! comment line to set up conditions for testing using :verify.
+Making them return a new value is NOT the same thing as making the
+engine have a different value. Unless the variable is marked as
+settable, setting a value affects only the value returned by a future
+call to the system variable. It does not change engine values the
+variable is meant to reflect.
+
+\section{Control Over Input}\label{control-over-input}
+
+The system can do a number of standard processing on user input,
+including spell correction, proper-name merging, expanding contractions
+etc. This is managed by setting the user variable \texttt{\$cs\_token}.
+
+The default one that comes with Harry is:
+
+\begin{verbatim}
+$cs_token = #DO_INTERJECTION_SPLITTING | 
+            #DO_SUBSTITUTE_SYSTEM |
+            #DO_NUMBER_MERGE | 
+            #DO_PROPERNAME_MERGE | 
+            #DO_SPELLCHECK |
+            #DO_PARSE
+\end{verbatim}
+
+The \texttt{\#}signals a named constant from the dictionarySystem.h
+file. One can set the following:
+
+These enable various LIVEDATA files to perform substitutions on input:
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+\begin{minipage}[b]{0.07\columnwidth}\raggedright\strut
+flag\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\raggedright\strut
+description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_ESSENTIALS}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+perform LIVEDATA/systemessentials which mostly strips off trailing
+punctuation and sets corresponding flags instead\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_SUBSTITUTES}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+perform LIVEDATA/substitutes\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_CONTRACTIONS}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+perform LIVEDATA/contractions, expanding contractions\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_INTERJECTIONS}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+perform LIVEDATA/interjections, changing phrases to interjections\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_BRITISH}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+perform LIVEDATA/british, respelling brit words to American\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_SPELLING}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+performs the LIVEDATA/spelling file (manual spell correction)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_TEXTING}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+performs the LIVEDATA/texting file (expand texting notation)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_SUBSTITUTE\_SYSTEM}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+do all LIVEDATA file expansions\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_INTERJECTION\_SPLITTING}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+break off leading interjections into own sentence\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_NUMBER\_MERGE}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+merge multiple word numbers into one (\emph{four and twenty})\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_PROPERNAME\_MERGE}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+merge multiple proper name into one (\_George Harrison-)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_DATE\_MERGE}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+merge month day and/or year sequences (\emph{January 2, 1993})\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+If any of the above items affect the input, they will be echoed as
+values into \%tokenFlags so you can detect they happened. The next
+changes do not echo into \%tokenFlags and relate to grammar of input:
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+\begin{minipage}[b]{0.07\columnwidth}\raggedright\strut
+flag\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\raggedright\strut
+description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_POSTAG}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+allow pos-tagging (labels like \textasciitilde{}noun
+\textasciitilde{}verb become marked)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_PARSE}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+allow parser (labels for word roles like
+\textasciitilde{}main\_subject)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_CONDITIONAL\_POSTAG}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+perform pos-tagging only if all words are known. Avoids wasting time on
+foreign sentences in particular\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{NO\_ERASE}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+where a substitution would delete a word entirely as junk, don't\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_SPLIT\_UNDERSCORES}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+happens after all other input tokenization and adjustments except number
+merge, and separates words that have been conjoined either because the
+dictionary has them (\emph{credit\_card}) or because they were merged by
+proper name merging, or by substitution. The result is only words
+without underscores (excluding number words like
+\emph{five\_thousand\_and\_four}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{MARK\_LOWER}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+if a word is considered a proper name in CS and is marked as an upper
+case word, this will force it to perform any markings for its lower case
+form as well. Sometimes users type stuff in upper case that really
+should be lower\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+Normally the system tries to outguess the user, who cannot be trusted to
+use correct punctuation or casing or spelling. These block that:
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+\begin{minipage}[b]{0.07\columnwidth}\raggedright\strut
+flag\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\raggedright\strut
+description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{STRICT\_CASING}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+except for 1st word of a sentence, assume user uses correct casing on
+words\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{NO\_INFER\_QUESTION}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+the system will not try to set the QUESTIONMARK flag if the user didn't
+input a ? and the structure of the input looks like a question\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{DO\_SPELLCHECK}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+perform internal spell checking\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{ONLY\_LOWERCASE}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+force all input (except ``I'') to be lower case, refuse to recognize
+uppercase forms of anything\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{NO\_IMPERATIVE}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{NO\_WITHIN}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{NO\_SENTENCE\_END}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+Normally the tokenizer breaks apart some kinds of sentences into two.
+These prevent that:
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+\begin{minipage}[b]{0.07\columnwidth}\raggedright\strut
+flag\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\raggedright\strut
+description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{NO\_COLON\_END}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+don't break apart a sentence after a colon\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{NO\_SEMICOLON\_END}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+don't break apart a sentence after a semi-colon\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{UNTOUCHED\_INPUT}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+if set to this alone, will tokenize only on spaces, leaving everything
+but spacing untouched\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\raggedright\strut
+\texttt{LEAVE\_QUOTE}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+if input is found withing " " it will become a single token exactly as
+it is seen. W/o Leave\_Quote, it is converted into a word without quotes
+and using underscores instead of spaces. So ``My Fair Lady'' becomes
+My\_Fair\_Lady, which would match a movie title if you had one, unlike
+\emph{My Fair Lady} becoming the resulting token and unrecognized\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+Note, you can change \texttt{\$cs\_token} on the fly and force input to
+be reanalyzed via \texttt{\^{}retry(SENTENCE)}. I do this when I detect
+the user is trying to give his name, and many foreign names might be
+spell-corrected into something wrong and the user is unlikely to
+misspell his own name. Just remember to reset \texttt{\$cs\_token} back
+to normal after you are done. Here is one such way, assuming
+\texttt{\$stdtoken} is set to your normal tokenflags in your bot
+definition outputmacro:
+
+\begin{verbatim}
+#! my name is Rogr
+s: (name is _*)
+
+    if ($cs_token == $stdtoken)
+        {
+        $cs_token = #DO_INTERJECTION_SPLITTING |
+                    #DO_SUBSTITUTE_SYSTEM | #DO_NUMBER_MERGE |
+                    #DO_PARSE
+        retry(SENTENCE)
+        }
+    _0 is the name.
+    $cs_token = $stdtoken
+\end{verbatim}
+
+If you type \emph{my name is Rogr} into a topic with this, the original
+input is spell-corrected to \emph{my name is Roger}, but this will
+change the \texttt{\$cs\_token} over to one without spell correction and
+redo the sentence, which will now come back with \emph{my name is Rogr}
+and be echoed correctly, and \texttt{\$cs\_token\ reset}. That's
+assuming nothing else would run differently and trap the response
+elsewhere. If you were worried about that, it would be possible for the
+script to save where it is using \texttt{\^{}getrule(tag)} and modify
+your control script to return immediate control to here after input
+processing if you had changed \texttt{\$cs\_token}.
+
+\subsection{Private Substitutions}\label{private-substitutions}
+
+While in general, substitutions are defined in the LIVEDATA folder, you
+can define private substititions for your specific bot using the
+scripting language. You can say
+
+\begin{verbatim}
+replace: xxx yyyyy
+\end{verbatim}
+
+which defines a substitution just like a livedata substitution file. It
+actually creates a substitution file called \texttt{private0.txt} or
+\texttt{private1.txt} in your TOPIC folder. Even then, those
+substitutions will not be enacted unless you explicitly add to the
+\$cs\_token value \#DO\_PRIVATE, eg
+
+\begin{verbatim}
+$cs_token = #DO_INTERJECTION_SPLITTING | 
+            #DO_SUBSTITUTE_SYSTEM |
+            #DO_NUMBER_MERGE | 
+            #DO_PROPERNAME_MERGE |
+            #DO_SPELLCHECK | 
+            #DO_PARSE | 
+            #DO_PRIVATE
+\end{verbatim}
+
+Similarly while canonical values of words can be defined in
+\texttt{LIVEDATA/SYSTEM/canonical.txt}, you can define private canonical
+values for your bots by using the scripting language. You can say:
+
+\begin{verbatim}
+canon: oh 0 faster fast
+\end{verbatim}
+
+which defines new canonical values for things and creates a file
+canon0.txt or canon1.txt in your TOPIC folder. If you want to set a
+canonical pair from a table during compilation, you can use a function
+to do the same thing (but only 1 pair at a time).
+
+\begin{verbatim}
+^canon(word canonicalform)
+\end{verbatim}
+
+\section{Interchange Variables}\label{interchange-variables}
+
+The following variables can be defined in a script and the engine will
+react to their contents.
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+\begin{minipage}[b]{0.26\columnwidth}\raggedright\strut
+interchange variable\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\raggedright\strut
+description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_token}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+described extensively above\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_response}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+controls automatic handling of outputs to user. By default it consists
+of
+\texttt{\$cs\_response\ =\ \#Response\_upperstart\ \textbar{}\ \#response\_removespacebeforecomma\ \textbar{}\ \#response\_alterunderscores\ \textbar{}\ \#response\_removetilde}
+If you want none of theses, use \$cs\_response = 0 (all flags turned
+off). See \^{}print for explanation of flags.
+\texttt{\#response\_upperstart} -- makes the first letter of an output
+sentence capitalized, \texttt{\#Response\_removespacebeforecomma} --
+does the obvious, \texttt{\#Response\_alterunderscores} - converts
+single underscores to spaces and double underscores to singles (eg for a
+web url)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_jsontimeout}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+seconds before JsonOpen declares a time out failure. If unspecified the
+default is 300\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_crashmsg}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+in server mode, what to say if the server crashes and we return a
+message to the user. By default the message is \emph{Hey, sorry. I
+forgot what I was thinking about.}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_abstract}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+used with :abstract\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_looplimit}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+loop() defaults to 1000 iterations before stopping. You can change this
+default with this\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_trace}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+if this variable is defined, then whenever the user's volley is
+finished, the value of this variable is set to that of :trace and :trace
+is cleared to 0, but when the user is read back in, the :trace is set to
+this value. For a server, this means you can perform tracing on a user
+w/o making all user transactions dump trace data\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_control\_pre}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+name of topic to run in gambit mode on pre-pass, set by author. Runs
+before any sentences of the input volley are analyzed. Good for setting
+up initial values\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_usermessagelimit}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+max number of message pairs (user input \& bot output) saved in topic
+file\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_externaltag}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+name of a topic to use to replace existing internal English pos-parser.
+See bottom of ChatScript PosParser manual for details\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_prepass}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+name of a topic to run in responder mode on main volleys, which runs
+before \$cs\_control\_main and after all of the above and pos-parsing is
+done. Used to amend preparation data coming from the engine. You can use
+it to add your own spin on input processing before going to your main
+control. I use it to, for example, label commands as questions,
+standardize sentence construction (like \emph{if you see me what will
+you think} to \emph{assume you see me. What will you think?})\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_control\_main}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+name of topic to run in responder mode on main volleys, set by
+author\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_control\_post}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+name of topic to run in gambit mode on post-pass, set by author\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$botprompt}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+message for console window to label bot output\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$userprompt}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+message for console window to label user input line\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_crashmsg}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+message to use if a server crash occurs\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_language}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+if spanish, will adjust spell checking for spanish colloquial\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_token}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+bits controlling how the tokenizer works. By default when null, you get
+all bits assumed on. The possible values are in src/dictionarySystem.h
+(hunt for \$token) and you put a \# in front of them to generate that
+named numeric constant\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_abstract}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+topic used by :abstract to display facts if you want them
+displayed\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_prepass}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+topic used between parsing and running user control script. Useful to
+supplement parsing, setting the question value, and revising input
+idioms\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_wildcardseparator}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+when a match variable covers multiple words, what should separate them-
+by default it's a space, but underscore is handy too. Initial system
+character is space, creating fidelity with what was typed. Useful if \_
+can be recognized in input (web addresses). Changing to \_ is consistent
+with multi-word representation and keyword recognition for concepts. CS
+automatically converts \_ to space on output, so internal use of \_ is
+normal\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_userfactlimit}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+how many of the most recent permanent facts created by the script in
+response to user inputs are kept for each user. Std default is 100\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_response}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+controls some characteristics of how responses are formatted\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_randIndex}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+the random seed for this volley\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_utcoffset}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+if defined, then \%time returns current utc time + timezone offset. The
+offset is usually a simple number, meaning hours, and can have + or --
+in front of it. It can also be a normal time reference like 02:30 which
+means plus 2 hours and 30 minutes beyond utc, or -01:30:20 which means 1
+hour, 30 minutes, and 20 seconds before utc (as if anyone would use
+that). The following variables are generated by the system on behalf of
+scripts\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$\$db\_error}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+error message from a postgres failure \$\$findtext\_start - \^{}findtext
+return the end normally, this is where it puts the start\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$\$tcpopen\_error}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+error message from a tcpopen error\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$\$document}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+name of the document being read in document mode\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_randindex}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+current value of the random generator value\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_bot}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+name of the bot currently in use\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.26\columnwidth}\raggedright\strut
+\texttt{\$cs\_login}\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\raggedright\strut
+login name of the user\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\end{document}

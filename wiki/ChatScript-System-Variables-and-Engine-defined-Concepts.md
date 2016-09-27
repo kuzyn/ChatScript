@@ -1,7 +1,9 @@
 # ChatScript System Variables and Engine-defined Concepts
 
 > © Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
-> Revision 7/31/2016 cs6.7a
+
+
+> Revision 9/25/2016 cs6.84
 
 
 * [Engine-defined Concepts](ChatScript-System-Variables-and-Engine-defined-Concepts.md#engine-defined-concepts)
@@ -268,10 +270,10 @@ your server is in Virginia and you are in Colorado).
 | `%actualtopic`      |  literally the current topic being processed (system or not) | 
 | `%trace`            |  Numeric value of the trace flag (:trace to set) | 
 | `%httpresponse`     |  return code of most recent ^jsonopen call | 
+| `%pid`     |  Linux process id or 0 for other systems | 
 
 
-## Build data
-
+## Build data+
 | variable   | description                         |
 | --------   | -------                             
 | `%dict`    | date/time the dictionary was built

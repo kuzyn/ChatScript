@@ -232,38 +232,81 @@ char* GetUserVariable(const char* word,bool nojson)
 	int len = 0;
 	const char* dot = (nojson) ? (const char*) NULL : strchr(word,'.');
 	if (dot) len = dot - word;
-
+	bool localvar = word[1] == LOCALVAR_PREFIX;
+    char* item = NULL;
+    
 	WORDP D = FindWord((char*) word,len,LOWERCASE_LOOKUP);
-	if (!D)  return "";	//   no such variable
+    if (!D) { goto NULLVALUE; }	//   no such variable
 
-	char* item = D->w.userValue;
-    if (!item)  return ""; // null value
-	if ( D->word[1] == LOCALVAR_PREFIX && *item == LCLVARDATA_PREFIX && item[1] == LCLVARDATA_PREFIX) 
-		item += 2; // skip `` marker
+	item = D->w.userValue;
+  	if (localvar) // is $_local variable whose value we get
+	{
+		if (!item)  goto NULLVALUE;
+		if (*item == LCLVARDATA_PREFIX && item[1] == LCLVARDATA_PREFIX) // should be true
+		{
+			item += 2; // skip `` marker
+		}
+	}
+	else if (!item) goto NULLVALUE; // null value normal
 
 	if (dot) // json object
 	{
-		if (strncmp(item,"jo-",3)) return "";	// cannot be dotted
+LOOPDEEPER:
+		if (strncmp(item,"jo-",3)) goto NULLVALUE; // cannot be dotted
 		D = FindWord(item);
-		if (!D) return "";
+		if (!D) goto NULLVALUE;
 		FACT* F = GetSubjectHead(D);
-		WORDP DOT = FindWord(dot+1); // case sensitive find
-		if (!DOT) return ""; // dont recognize such a name
-		MEANING verb = MakeMeaning(DOT);
+
+		char* dot1 = (char*)strchr(dot+1,'.');	// more dot like $x.y.z?
+		if (dot1) *dot1 = 0;
+		WORDP key = FindWord(dot+1); // case sensitive find
+		if (dot1) *dot1 = '.';
+		if (!key) goto NULLVALUE; // dont recognize such a name
+
+		MEANING verb = MakeMeaning(key);
 		while (F)
 		{
 			if (F->verb == verb) 
 			{
 				char* answer = Meaning2Word(F->object)->word;
-				if (!strcmp(answer,"null")) return "";	// json null is our null
+				if (!strcmp(answer,"null")) 
+				{
+					item = "``";
+					return item + 2; // null value for locals
+				}
+				// does it continue?
+				if (dot1)
+				{
+					item = answer;
+					dot = dot1;
+					goto LOOPDEEPER;
+				}
+
+				if (localvar)
+				{
+					char* buffer = AllocateBuffer();
+					strcpy(buffer,"``");
+					strcpy(buffer+2,answer);
+					char* answer = AllocateInverseString(buffer);
+					FreeBuffer();
+					return answer + 2;
+				}
 				return answer;
 			}
 			F = GetSubjectNext(F);
 		}
-		return "";	// not found null value
+		goto NULLVALUE;
 	}
 
     return (*item == '&') ? (item + 1) : item; //   value is quoted or not
+
+NULLVALUE:
+	if (localvar)
+	{
+		item = "``";
+		return item + 2; // null value for locals
+	}
+	return "";
  }
 
 void ClearUserVariableSetFlags()
@@ -462,7 +505,14 @@ void Add2UserVariable(char* var, char* moreValue,char* op,char* originalArg)
 
 	// store result back
 	if (*var == '_')  SetWildCard(result,result,var,0); 
-	else if (*var == USERVAR_PREFIX) SetUserVariable(var,result);
+	else if (*var == USERVAR_PREFIX) 
+	{
+		char* dot = strchr(var,'.');
+		if (!dot) SetUserVariable(var,result);
+#ifndef DISCARDJSON
+		else JSONVariableAssign(var,dot,result);// json object insert
+#endif
+	}
 	else if (*var == '^') strcpy(callArgumentList[atoi(var+1)+fnVarBase],result); 
 }
 

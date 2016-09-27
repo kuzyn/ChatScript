@@ -1845,7 +1845,6 @@ char* ReadCompiledWord(char* ptr, char* word,bool noquote,bool var)
 	else 
 	{
 		bool quote = false;
-		bool oncedot = false;
 		while ((c = *ptr++) && c != ENDUNIT) 
 		{
 			if (quote) {}
@@ -1855,7 +1854,7 @@ char* ReadCompiledWord(char* ptr, char* word,bool noquote,bool var)
 
 			if (special) // try to end a variable if not utf8 char or such
 			{
-				if (special == '$' && c == '.' && !oncedot) oncedot = true;
+				if (special == '$' && c == '.' && LegalVarChar(*ptr)) {;} // not a trailing .
 				else if ( !IsAlphaUTF8OrDigit(c) && c != special && c != '_' && c != '-' ) break;
 			}
 

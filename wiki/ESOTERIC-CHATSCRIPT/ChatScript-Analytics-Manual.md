@@ -1,6 +1,8 @@
 # ChatScript Analytics Manual
 
 > © Bruce Wilcox, gowilcox@gmail.com
+
+
 > Revision 1/17/2015 cs6.1
 
 Your bot has been written and debugged and released. You are getting log files from users. What can

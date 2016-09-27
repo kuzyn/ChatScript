@@ -47,7 +47,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <body>
 <h1 id="chatscript-json-manual">ChatScript JSON Manual</h1>
 <blockquote>
-<p>© Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com Revision 8/13/2016 cs6.8</p>
+<p>© Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com</p>
+</blockquote>
+<blockquote>
+<p>Revision 9/25/2016 cs6.84</p>
 </blockquote>
 <h1 id="real-world-json">Real World JSON</h1>
 <p>JSON (JavaScript Object Notation) is an open standard format using human-readable text to transmit data objects over the web. It is a common standard largely replacing XML which is too wordy and hard to read. JSON has two datatypes that represents collections of values, the array and the object. A JSON array is a list of JSON entities separated by commas and placed within [], e.g.,</p>
@@ -127,14 +130,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <pre><code>^query(direct_v ? verbkey ?)</code></pre>
 <p>Or even if the key is not unique you can restrict matches to facts having the <code>JSON_OBJECT_FACT</code> flag.</p>
 <pre><code>^query(directflag_v ? verbkey ? 1 ? ? ? JSON_OBJECT_FACT)</code></pre>
-<p>Be aware that when <code>^jsonpat</code>h returns the value of an object key, when the value is a simple word, it just returns the word without doublequotes (since CS just stores information as a single word). But if the value contains whitespace, or JSON special characters, that may mess up if you pass it to <code>^JSONFormat</code>. You can get <code>^jsonpath</code> to return dangerous data as a string with double quotes around it if you add a 3rd argument &quot;safe&quot; to the call.</p>
+<p>Be aware that when <code>^jsonpath</code> returns the value of an object key, when the value is a simple word, it just returns the word without doublequotes (since CS just stores information as a single word). But if the value contains whitespace, or JSON special characters, that may mess up if you pass it to <code>^JSONFormat</code>. You can get <code>^jsonpath</code> to return dangerous data as a string with double quotes around it if you add a 3rd argument &quot;safe&quot; to the call.</p>
 <pre><code>^jsonpath(&quot;.name&quot; $$jsonobject safe)</code></pre>
 <h3 id="jsonpath"><code>^jsonpath</code></h3>
 <p>can also return the actual factid of the match, instead of the object of the fact. This would allow you to see the index of a found array element, or the json object/array name involved. Or you could use ^revisefact to change the specific value of that fact (not creating a new fact). Just add * after your final path, eg</p>
 <pre><code>^jsonpath(.name* $$obj)
 ^jsonpath(.name[4]* $$obj)</code></pre>
+<p>If you need to handle the full range of legal keys in json, you can use text string notation like this <code>^jsonpath(.&quot;st. helen&quot;.data $tmp)</code>.</p>
 <h2 id="direct-access-via-json-variables-myvar.field">Direct access via JSON variables <code>$myvar.field</code></h2>
-<p>If a variable holds a JSON object value, you can directly set and get from top level fields of that object using dotted notation. This must be a fixed static fieldname you give- <code>$myvar.$myfield</code> is illegal. Dotted notation is cleaner and faster than <code>^jsonpath</code> and <code>jsonobjectinsert</code> and for get, has the advantage that it never fails, it only returns null if it can't find the field.</p>
+<p>If a variable holds a JSON object value, you can directly set and get from fields of that object using dotted notation. This must be a fixed static fieldname you give- <code>$myvar.$myfield</code> is illegal. Dotted notation is cleaner and faster than <code>^jsonpath</code> and <code>jsonobjectinsert</code> and for get, has the advantage that it never fails, it only returns null if it can't find the field. On the other hand, assignment fails if the path does not contain a json object at some level.</p>
+<pre><code>$x = $$$obj.name.value.data.side 
+$$$obj.name.value.data.side = 7</code></pre>
 <h3 id="length-jsonid"><code>^length</code>( jsonid )</h3>
 <p>Returns the number of top-level members in a json array or object.</p>
 <h2 id="printing-json-structures">Printing JSON structures</h2>
@@ -253,12 +259,13 @@ $$user_agent = ^&quot;User-Agent: Mozilla/5.0 (compatible; MSIE 10.0; Windows NT
 </table>
 <p>Using queries, you could get all values of an array. Or all fields of an object. Or all JSON facts where the field is the id. You could manually write script to walk the entire tree. But more likely you will use <code>^jsonpath</code> to retrieve specific pieces of data you want. For example, you could do a query on the value returned by <code>^jsonopen</code> as subject, to find out how many array elements there are. Then use <code>^jsonpath</code> to walk each array element to retrieve a specific field buried within. Note- for things like primitive null, null arrays, null strings, null objects, these are represented as &quot;null&quot; and the corresponding fact flag tells you the kind of value it is.</p>
 <p>You can also ask CS to show those out visually using <code>^jsontree</code>.</p>
-<p>Note that the facts created are all transient and disappear at the end of the volley unless you have forced them to stay. Forcing them to stay is generally a bad idea because it will congest your user topic data file, slowing it down or exceeding its capacity, and because those facts may then collide with new facts created by a new <code>^jsonopen</code> on a new volley. The array and object ids are cleared at each volley, so you will be reusing the same names on new unrelated facts.</p>
+<p>Note that the facts created are all transient and disappear at the end of the volley unless you have forced them to stay via <code>permanent</code>. Forcing them to stay is generally a bad idea because it will congest your user topic data file, slowing it down or exceeding its capacity, and because those facts may then collide with new facts created by a new <code>^jsonopen</code> on a new volley. The array and object ids are cleared at each volley, so you will be reusing the same names on new unrelated facts.</p>
 <p>Using the flag values, it is entirely possible to reconstruct the original JSON from the facts (if the root is an array or object because otherwise there are no facts involved), but I can't think of use cases at present where you might want to. You cannot compile CS on LINUX unless you have installed the CURL library. For Amazon machines that means doing this:</p>
 <pre><code>sudo yum -y install libcurl libcurl-devel</code></pre>
 <p>On some other machines that doesn't install library stuff and maybe you need</p>
 <pre><code>sudo apt-get install libcurl3 libcurl3-gnutls libcurl4-openssl-dev</code></pre>
 <p>System variables <code>%httpresponse</code> will hold the most recent http return code from calling <code>^jsonopen</code>.</p>
+<p>If you call <code>^jsonopen(direct ...</code> then the result will not be facts, but the text will be directly shipped back as the answer. Be wary of doing this if the result will be large (&gt;30K?) since you will overflow your buffer without being checked.</p>
 <h2 id="json-out-of-band-output-data">JSON &amp; Out-of-band output data</h2>
 <p>Out-of-band data in ChatScript is signaled by the output beginning with data enclosed in <code>[]</code>. Which might be confusing, since JSON uses <code>[]</code> to denote an array. Standalone ChatScript contains a built-in handler for OOB data and if you pass it JSON at the start of output, it will swallow it and not display it (unless you turn on OOB display).</p>
 <p>Similarly, std webpage interfaces connecting to ChatScript do likewise. So if you want to see this information, you should put something in the output at the start which is NOT the JSON data. Anything will do. The only time you might actually need the JSON clean at the beginning is from some special purpose application, and in that case you will write your own OOB handler anyway (or not have one).</p>

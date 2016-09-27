@@ -1,6 +1,8 @@
 # ChatScript Fact Manual
 
 > © Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
+
+
 > Revision 5/19/2016cs6.5a
 
 * [Simple Facts](ChatScript-Fact-Manual.md#simple-facts)

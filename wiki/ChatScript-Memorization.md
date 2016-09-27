@@ -1,5 +1,9 @@
 # User Memorization in Conversation
-> 8-5-2013 CS 3.52
+
+> © Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
+
+> Revision 8-5-2013 CS 3.52
+
 
 An initial impression of the bot hearing and understanding the user comes from a gambit asking the
 user a question, and a rejoinder replying specifically to what the user said. E.g.
@@ -24,7 +28,7 @@ and drop it back into conversation later. This will create a vivid impression on
 
 This is easiest done by memorizing certain kinds of information and having a use for them later.
 Things like what pet they have, whether they like coffee or not, their age, etc. There are two places one
-can store longer term data – variables and facts. Variables are the cheapest and most efficient thing to
+can store longer term data variables and facts. Variables are the cheapest and most efficient thing to
 use. Here is an example of memorizing pets:
 
 ```
@@ -43,7 +47,7 @@ s: ( %tense!=past << I ~own _~animal >>) $pet = _0
 
 The above will either catch an unprovoked statement by the user that he owns some animal (not owned
 in the past) or will catch a reference to some animal in response to the bot's question while commenting
-at the same time. We now have a value for $pet. This can be used later in the same topic/conversation
+at the same time. We now have a value for `$pet`. This can be used later in the same topic/conversation
 as follows:
 
 ```
@@ -161,4 +165,4 @@ t: ($pet?~table_pets) Do you ever feed your $pet table scraps during dinner?
 ```
 Note that $pet is a variable that, once set, lives forever with the user data unless you explicitly erase it.
 Therefore it can be used all over the place, and only gambits and responders using it that generate
-output will get erased – the variable remains for other rules to trigger on.
+output will get erased, the variable remains for other rules to trigger on.

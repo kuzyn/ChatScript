@@ -1,7 +1,9 @@
 # ChatScript JSON Manual
 
 > © Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
-> Revision 8/13/2016 cs6.8
+
+
+> Revision 9/25/2016 cs6.84
 
 
 # Real World JSON
@@ -209,14 +211,20 @@ your final path, eg
 ^jsonpath(.name[4]* $$obj)
 ```
 
-If you need to handle the full range of legal keys in json, you can use text string notation like this `^jsonpath(."st. helen".data $tmp)`.
+If you need to handle the full range of legal keys in json, you can use text string notation like this
+ `^jsonpath(."st. helen".data $tmp)`.
 
 ## Direct access via JSON variables `$myvar.field`
 
-If a variable holds a JSON object value, you can directly set and get from top level fields of that object
+If a variable holds a JSON object value, you can directly set and get from fields of that object
 using dotted notation. This must be a fixed static fieldname you give- `$myvar.$myfield` is illegal.
 Dotted notation is cleaner and faster than `^jsonpath` and `jsonobjectinsert` and for get, has
-the advantage that it never fails, it only returns null if it can't find the field.
+the advantage that it never fails, it only returns null if it can't find the field. 
+On the other hand, assignment fails if the path does not contain a json object at some level.
+```
+$x = $$$obj.name.value.data.side 
+$$$obj.name.value.data.side = 7
+```
 
 
 ### `^length`( jsonid )
@@ -357,7 +365,7 @@ and the corresponding fact flag tells you the kind of value it is.
 You can also ask CS to show those out visually using `^jsontree`.
 
 Note that the facts created are all transient and disappear at the end of the volley unless you have forced
-them to stay. Forcing them to stay is generally a bad idea because it will congest your user topic data
+them to stay via `permanent`. Forcing them to stay is generally a bad idea because it will congest your user topic data
 file, slowing it down or exceeding its capacity, and because those facts may then collide with new facts
 created by a new `^jsonopen` on a new volley. The array and object ids are cleared at each volley, so
 you will be reusing the same names on new unrelated facts.
@@ -378,6 +386,9 @@ sudo apt-get install libcurl3 libcurl3-gnutls libcurl4-openssl-dev
 
 System variables `%httpresponse` will hold the most recent http return code from calling `^jsonopen`.
 
+If you call `^jsonopen(direct ...` then the result will not be facts, but the text will be directly shipped
+back as the answer. Be wary of doing this if the result will be large (>30K?) since you will overflow your
+buffer without being checked.
 
 ## JSON & Out-of-band output data
 

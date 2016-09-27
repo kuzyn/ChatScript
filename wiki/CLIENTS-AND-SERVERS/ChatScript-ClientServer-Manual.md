@@ -1,7 +1,9 @@
 # ChatScript Client/Server Manual
 
 > © Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
-> Revision 7/31/2016 cs6.7a
+
+
+> Revision 9/25/2016 cs6.84
 
 * [Running the server](ChatScript-ClientServer-Manual.md#running-the-server)
 * [Unique User Names](ChatScript-ClientServer-Manual.md#unique-user-names)
@@ -19,6 +21,7 @@
 * [Command Authorization](ChatScript-ClientServer-Manual.md#command-authorization)
 * [Command line parameters](ChatScript-ClientServer-Manual.md#command-line-parameters)
 * [RESTful server](ChatScript-ClientServer-Manual.md#restful-server)
+* [Encryption](ChatScript-ClientServer-Manual.md#encrption)
 
 While the system defaults to running as a stand-alone chatbot under Windows, when run
 under LINUX it defaults to being a server.
@@ -617,4 +620,24 @@ seed or turn number, or you can write them out as well.
 
 7. Currently there is no interface to context data so you can't write that out.
 Generally all this will be written out by a post-process phase.
+
+# Encryption
+
+ChatScript normally reads and writes everything in plain text. If you need greater security then you need to do several things.
+
+1. turn off server logs and user logs
+
+2. Use encrypt=  and decrypt= command line parameters.
+
+3. Use default system or roll your own encryption in privatecode.
+
+Encryption applies to user topic files and long term memory files (^export and ^import). The built-in encryption method calls an external api server using json to perform encryption and decryption, passing the server urls provided by encrypt= and decrypt= command line parameters.  The routines will add in the user's login id if you use %s in the command line parameters. Eg.,
+
+encrypt=http://someapi/someotherdata/%s
+decrypt=http://someapi/%s/something
+
+Where %s goes depends on the api you call.  
+
+To roll your own, you have to define routines in private code that encrypt and decrypt (see examples in os.cpp) and on private initialization override the default variables controlling userFileSystem.encrypt and userFileSystem.decrypt.
+
 

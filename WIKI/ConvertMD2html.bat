@@ -1,3 +1,4 @@
+pandoc ../README.md -s -o ../README.html
 pandoc ChatScript-Advanced-User-Manual.md -s -o ../HTMLDOCUMENTATION/ChatScript-Advanced-User-Manual.html
 pandoc ChatScript-Basic-User-Manual.md -s -o ../HTMLDOCUMENTATION/ChatScript-Basic-User-Manual.html
 pandoc ChatScript-Debugging-Manual.md -s -o ../HTMLDOCUMENTATION/ChatScript-Debugging-Manual.html
@@ -10,7 +11,7 @@ pandoc ChatScript-Pattern-Redux.md -s -o ../HTMLDOCUMENTATION/ChatScript-Pattern
 pandoc ChatScript-System-Functions-Manual.md -s -o ../HTMLDOCUMENTATION/ChatScript-System-Functions-Manual.html
 pandoc ChatScript-System-Variables-and-Engine-defined-Concepts.md -s -o ../HTMLDOCUMENTATION/ChatScript-System-Variables-and-Engine-defined-Concepts.html
 pandoc Installing-and-Updating-ChatScript.md -s -o ../HTMLDOCUMENTATION/Installing-and-Updating-ChatScript.html
-pandoc README.md -s -o ../HTMLDOCUMENTATION/README.html
+pandoc Documentation-Guide.md -s -o ../HTMLDOCUMENTATION/README.html
 
 pandoc CLIENTS-AND-SERVERS/ChatScript-Amazon-Server.md -s -o ../HTMLDOCUMENTATION/CLIENTS-AND-SERVERS/ChatScript-Amazon-Server.html
 pandoc CLIENTS-AND-SERVERS/ChatScript-ClientServer-Manual.md -s -o ../HTMLDOCUMENTATION/CLIENTS-AND-SERVERS/ChatScript-ClientServer-Manual.html

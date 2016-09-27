@@ -1,6 +1,8 @@
 # ChatScript Javascript
 
 > © Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
+
+
 > Revision 4/30/2016 cs6.4
 
 You can write functions in Javascript in your script files and invoke them from

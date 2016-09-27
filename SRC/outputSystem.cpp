@@ -649,7 +649,7 @@ static char* Output_Function(char* word, char* ptr,  bool space,char* buffer, un
 	{
 		if (!once && IsAssignmentOperator(ptr)) // we are lefthand side indirect
 		{
-			if (word[1] != '^' || !IsDigit(word[2])) // all other indirections
+			if (word[1] != '^' || !IsDigit(word[2])) // anything but ^^2
 			{
 				Output(word+1,buffer,result,controls|OUTPUT_NOTREALBUFFER); // no leading space  - we now have the variable value from the indirection
 				strcpy(word,buffer);
@@ -657,13 +657,16 @@ static char* Output_Function(char* word, char* ptr,  bool space,char* buffer, un
 			*buffer = 0;
 			ptr = PerformAssignment(word,ptr,result,true); //   =  or *= kind of construction -- dont do json indirect assignment
 		}
-		else Output(word+1,buffer,result,controls|OUTPUT_NOTREALBUFFER); // no leading space  - we now have the variable value from the indirection
-		if (word[1] == USERVAR_PREFIX) // direct retry to avoid json issues
+		else // we are right side (expression) indirect
 		{
-			strcpy(word,GetUserVariable(word+1));
-			Output_Dollar(word, "", space,buffer,controls,result,false,true);
+			Output(word+1,buffer,result,controls|OUTPUT_NOTREALBUFFER); // no leading space  - we now have the variable value from the indirection
+			if (word[1] == USERVAR_PREFIX) // direct retry to avoid json issues
+			{
+				strcpy(word,GetUserVariable(word+1));
+				Output_Dollar(word, "", space,buffer,controls,result,false,true);
+			}
+			else *word = ENDUNIT;	// marker for retry
 		}
-		else *word = ENDUNIT;	// marker for retry
 	}
 	else if (!strcmp(word,(char*)"^if")) ptr = HandleIf(ptr,buffer,result);  
 	else if (!strcmp(word,(char*)"^loop")) ptr = HandleLoop(ptr,buffer,result); 

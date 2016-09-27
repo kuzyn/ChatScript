@@ -12,9 +12,10 @@ bool safeJsonParse = false;
 
 int jsonStore = 0; // where to put json fact refs
 int jsonIndex;
+int jsonOpenSize = 0;
 unsigned int jsonPermanent = FACTTRANSIENT;
 bool jsonNoduplicate = false;
-
+bool directJsonText = false;
 static int arraycnt = 0;
 static int objectcnt = 0;
 static FunctionResult JSONpath(char* buffer, char* path, char* jsonstructure,bool raw,bool nofail);
@@ -23,6 +24,7 @@ static MEANING jcopy(WORDP D);
 static int JSONArgs() 
 {
 	int index = 1;
+	directJsonText = false;
 	bool used = false;
 	jsonPermanent = FACTTRANSIENT; // default
 	jsonNoduplicate = false;
@@ -48,6 +50,7 @@ static int JSONArgs()
 			used = true;
 		}
 		else if (!stricmp(word,(char*)"transient"))  used = true;
+		else if (!stricmp(word,(char*)"direct"))  directJsonText = true; // used by jsonopen
 		else if (!stricmp(word,(char*)"safe")) safeJsonParse = used = true;
 	}
 	if (used) ++index;
@@ -322,7 +325,7 @@ static int my_trace(CURL *handle, curl_infotype type, char *data, size_t size, v
 FUNCTION: JSONOpenCode
 
 		  Function arguments :
-
+optional argument(1) - permanent, transient, direct
 ARGUMENT(1) - request method : POST, GET, POSTU, GETU
 ARGUMENT(2) - URL. The URL to use in the request
 ARGUMENT(3) - If a POST request, this argument contains the post data
@@ -678,20 +681,30 @@ FunctionResult JSONOpenCode(char* buffer)
 	if (res != CURLE_OK) return FAILRULE_BIT;
 	// 300 seconds is the default timeout
 	// CUrl is gone, we have the json data now to convert
-	ChangeDepth(1,(char*)"ParseJson");
-	FunctionResult result = ParseJson(buffer, output.buffer,output.size,false);
-	char x[MAX_WORD_SIZE];
-	if (result == NOPROBLEM_BIT)
+	FunctionResult result = NOPROBLEM_BIT;
+	if (directJsonText)
 	{
-		ReadCompiledWord(buffer,x);
-		if (*x) // empty json object should not be returned, will not survive on its own
-		{
-			WORDP X = FindWord(x);
-			if (X && X->subjectHead == NULL) 
-				*buffer = 0; 
-		}
+		strncpy(buffer,output.buffer,output.size); // be wary because this may be too much for caller
+		buffer[output.size] = 0;
+		jsonOpenSize = output.size;
 	}
-	ChangeDepth(-1,(char*)"ParseJson");
+	else
+	{
+		ChangeDepth(1,(char*)"ParseJson");
+		result = ParseJson(buffer, output.buffer,output.size,false);
+		char x[MAX_WORD_SIZE];
+		if (result == NOPROBLEM_BIT)
+		{
+			ReadCompiledWord(buffer,x);
+			if (*x) // empty json object should not be returned, will not survive on its own
+			{
+				WORDP X = FindWord(x);
+				if (X && X->subjectHead == NULL) 
+					*buffer = 0; 
+			}
+		}
+		ChangeDepth(-1,(char*)"ParseJson");
+	}
 	if (trace & TRACE_JSON)
 	{
 		char c;
@@ -1555,13 +1568,40 @@ FunctionResult JSONObjectInsertCode(char* buffer) //  objectname objectkey objec
 
 FunctionResult JSONVariableAssign(char* word,char* dot,char* value)
 {
+	// get the object referred to
+	dot = strchr(word+1,'.'); // find first level
 	*dot = 0;
-	char* val = GetUserVariable(word);
-	*dot = '.';
-	if (!*val) return FAILRULE_BIT;
+	char* val = GetUserVariable(word); // walks down to deepest record value
+	if (strnicmp(val,"jo-",3)) return FAILRULE_BIT;	// not a json object
 	WORDP objectname = FindWord(val);
 	if (!objectname) return FAILRULE_BIT;	// doesnt exist?
-	WORDP keyname = StoreWord(dot+1,AS_IS);		// make it exist
+
+LOOP:
+	*dot = '.';
+	char* dot1 = strchr(dot+1,'.');
+	if (dot1) *dot1 = 0;
+
+	// get final key to use
+	WORDP keyname;
+	keyname = (dot1) ? FindWord(dot+1) : StoreWord(dot+1,AS_IS);	
+	if (!keyname) return FAILRULE_BIT;	// unable to find intermediate name
+	
+	// make it exist
+	if (dot1) 
+	{
+		FACT* F = GetSubjectNondeadHead(objectname);
+		while (F)
+		{
+			if (F->verb == MakeMeaning(keyname)) break;
+			F = GetSubjectNondeadNext(F);
+		}
+		if (!F) return FAILRULE_BIT;
+		objectname = Meaning2Word(F->object);
+		dot = dot1;
+		goto LOOP;
+	}
+
+	// now at final resting place
 
 	unsigned int flags = JSON_OBJECT_FACT;
 	if (objectname->word[3] == 't') flags |= FACTTRANSIENT; // like jo-t34
@@ -1570,7 +1610,7 @@ FunctionResult JSONVariableAssign(char* word,char* dot,char* value)
 	MEANING key = MakeMeaning(keyname);
 
 	// remove old value if it exists, do not allow multiple values
-	FACT* F = GetSubjectNondeadHead(object);
+	FACT* F = GetSubjectNondeadHead(objectname);
 	while (F)	// already there, delete it
 	{
 		if (F->verb == key)
@@ -1685,7 +1725,7 @@ FunctionResult JSONArrayInsertCode(char* buffer) //  objectfact objectvalue  BEF
 FunctionResult JSONCopyCode(char* buffer)
 {
 	int index = JSONArgs();
-	char* arg = ARGUMENT(++index);
+	char* arg = ARGUMENT(index++);
 	WORDP D = FindWord(arg);
 	if (!D) return FAILRULE_BIT;
 	if (strncmp(D->word,(char*)"ja-",3) && strncmp(D->word,(char*)"jo-",3)) return FAILRULE_BIT;

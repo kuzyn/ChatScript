@@ -3881,6 +3881,7 @@ static void C_Bot(char* name)
 static void C_Build(char* input)
 {
 #ifndef DISCARDSCRIPTCOMPILER
+	echo = true;
 	mystart(input);
 	char oldlogin[MAX_WORD_SIZE];
 	char oldbot[MAX_WORD_SIZE];
@@ -4516,7 +4517,7 @@ static bool DumpUpHierarchy(MEANING T,int depth)
     if (!T) return true;
 
     WORDP E = Meaning2Word(T);
-	if (E->inferMark == inferMark) return false;	
+	if (E->inferMark == inferMark) return true;	
 	E->inferMark = inferMark; // came this way
 	unsigned int restrict = GETTYPERESTRICTION(T);
 	unsigned int index = Meaning2Index(T);
@@ -6017,10 +6018,10 @@ static void C_Do(char* input)
 #ifndef DISCARDSCRIPTCOMPILER
 	hasErrors = 0;
 	ReadOutput(input, NULL,out,NULL,NULL,NULL,false);
+	FunctionResult result = NOPROBLEM_BIT;
 	if (hasErrors) Log(STDTRACELOG,(char*)"\r\nScript errors prevent execution.");
 	else 
 	{
-		FunctionResult result;
 		FreshOutput(data,answer,result);
 		if (trace & TRACE_OUTPUT) Log(STDTRACELOG,(char*)"   result: %s  output: %s\r\n",ResultCode(result),answer);
 		AddResponse(answer,responseControl);
@@ -6031,7 +6032,8 @@ static void C_Do(char* input)
 	FreeBuffer();
 	FreeBuffer();
 	RESTOREOLDCONTEXT()
-	wasCommand = OUTPUTASGIVEN; // save results to user file
+	if (result == RESTART_BIT) wasCommand = RESTART;
+	else wasCommand = OUTPUTASGIVEN; // save results to user file
 }
 
 static void C_Silent(char* input)
@@ -7890,7 +7892,8 @@ static void TrimIt(char* name,uint64 flag)
 
 		char user[MAX_WORD_SIZE];
 		char* ptr = strstr(readBuffer,(char*)"user:") + 5;
-		ptr = ReadCompiledWord(ptr,user);
+		if (*ptr == ' ') strcpy(user,"anonymous");
+		else ptr = ReadCompiledWord(ptr,user);
 
 		char bot[MAX_WORD_SIZE];
 		ptr = ReadCompiledWord(ptr+4,bot); // skip "bot:"

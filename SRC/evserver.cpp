@@ -309,7 +309,7 @@ static void evsrv_child_died(EV_P_ ev_child *w, int revents) {
     int r = fork_child(w);
 
     if (r < 0)  Log(SERVERLOG, "  evserver: could not re-spawn child after it died [pid: %d]\n", w->pid);
-     else if (r == 1)   Log(SERVERLOG, "  evserver child: re-spawned [pid: %d]\n", getpid());
+    else if (r == 1)   Log(SERVERLOG, "  evserver child: re-spawned [pid: %d]\n", getpid());
 }
 #endif
 
@@ -574,7 +574,8 @@ int evsrv_do_chat(Client_t *client)
 	if (len >= MAX_BUFFER_SIZE - 100) client->message[MAX_BUFFER_SIZE-1] = 0;
 	strcpy(ourMainInputBuffer,client->message);
 	echo = false;
-	if (serverPreLog)  Log(SERVERLOG,(char*)"ServerPre: %s (%s) %s\r\n",client->user,client->bot,ourMainInputBuffer);
+    char* dateLog = GetTimeInfo(true)+SKIPWEEKDAY;
+	if (serverPreLog)  Log(SERVERLOG,(char*)"ServerPre: %s (%s) %s %s\r\n",client->user,client->bot,ourMainInputBuffer, dateLog);
 
     int turn = PerformChat(
         client->user,

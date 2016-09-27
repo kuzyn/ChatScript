@@ -1,7 +1,9 @@
 # ChatScript Debugging Manual
 
 > © Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com
-> Revision 8/5/2016 cs6.7b
+
+
+> Revision 9/25/2016 cs6.84
 
 You’ve written script. It doesn’t work. Now what? Now you need to debug it, fix it, and
 recompile it. Debugging is mostly a matter of tracing what the system does testpaand
@@ -314,6 +316,29 @@ list all user functions being traced
 
 ### `:tracedtopics`
 list all topics being traced
+
+### `:time`
+measures milliseconds taken by topics and functions for performance analysis. Just type :time to see keywords.
+
+`:time all` turns on timing everywhere
+
+It is similar to `:trace` (using several of the same keywords) and can be used to limit to just certain topics/rules and ^macros. 
+A simple `:time` will list those keywords.
+
+Note the time output is only shown in the user’s log file and is not echoed to the console.
+
+By default items that don’t take any time will not be shown, but this can be overridden by `:time always`
+
+### `:notime`
+disables timing for some topic or functions
+
+### `:timedtopics`
+lists what topics are currently being timed.
+
+### `:timedfunctions`
+list functions currently being timed
+
+
 
 ### `:retry`
 ### `:retry` _This is my new input_

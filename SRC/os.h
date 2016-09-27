@@ -54,7 +54,9 @@ bool KeyReady();
 int MakeDirectory(char* directory);
 
 // FILE SYSTEM
-
+void EncryptInit(char* params);
+void DecryptInit(char* params);
+void EncryptRestart();
 extern unsigned int currentFileLine;
 extern char currentFilename[MAX_WORD_SIZE];
 extern struct tm* ptm;
@@ -73,7 +75,7 @@ FILE* FopenUTF8Write(const char* filename);
 FILE* FopenUTF8WriteAppend(const char* filename, const char* flags = "ab");
 typedef void (*FILEWALK)(char* name, uint64 flag);
 void CopyFile2File(const char* newname,const char* oldname,bool autoNumber);
-
+bool LogEndedCleanly();
 
 #ifdef INFORMATION
 Normally user topic files are saved on the local filesystem using fopen, fclose, fread, fwrite, fseek, ftell calls.

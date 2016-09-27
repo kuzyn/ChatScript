@@ -511,8 +511,9 @@ void LogChat(clock_t starttime,char* user,char* bot,char* IP, int turn,char* inp
 	char* why = output + strlen(output) + 3; //skip terminator + 2 ctrl z end marker
 	char* activeTopic = why + strlen(why) + 1;
 	clock_t endtime = ElapsedMilliseconds(); 
-	if (*input) Log(SERVERLOG,(char*)"Respond: user:%s bot:%s ip:%s (%s) %d %s  ==> %s  When:%s %dms %s\n", user,bot,IP,activeTopic,turn,input,Purify(output),date,(int)(endtime - starttime),why);
-	else Log(SERVERLOG,(char*)"Start: user:%s bot:%s ip:%s (%s) %d ==> %s  When:%s %dms Version:%s Build0:%s Build1:%s %s\n", user,bot,IP,activeTopic,turn,Purify(output),date,(int)(endtime - starttime),version,timeStamp[0],timeStamp[1],why);
+	char* nl = (LogEndedCleanly()) ? (char*) "" : (char*) "\r\n";
+	if (*input) Log(SERVERLOG,(char*)"%sRespond: user:%s bot:%s ip:%s (%s) %d %s  ==> %s  When:%s %dms %s\n", nl,user,bot,IP,activeTopic,turn,input,Purify(output),date,(int)(endtime - starttime),why);
+	else Log(SERVERLOG,(char*)"%sStart: user:%s bot:%s ip:%s (%s) %d ==> %s  When:%s %dms Version:%s Build0:%s Build1:%s %s\n",nl, user,bot,IP,activeTopic,turn,Purify(output),date,(int)(endtime - starttime),version,timeStamp[0],timeStamp[1],why);
 }
 
 #ifndef EVSERVER // til end of file
@@ -1087,7 +1088,8 @@ static void* MainChatbotServer()
 		if (test >= (MAX_BUFFER_SIZE - 100)) strcpy(ourMainInputBuffer,(char*)"too much data");
 		else strcpy(ourMainInputBuffer,ptr); // xfer user message to our incoming feed
 		echo = false;
-		if (serverPreLog)  Log(SERVERLOG,(char*)"ServerPre: %s (%s) %s\r\n",user,bot,ourMainInputBuffer);
+        char* dateLog = GetTimeInfo(true)+SKIPWEEKDAY;
+		if (serverPreLog)  Log(SERVERLOG,(char*)"ServerPre: %s (%s) %s %s\r\n",user,bot,ourMainInputBuffer, dateLog);
 
 		returnValue = PerformChat(user,bot,ourMainInputBuffer,ip,ourMainOutputBuffer);	// this takes however long it takes, exclusive control of chatbot.
 	} // end try block on calling cs performchat

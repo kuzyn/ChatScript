@@ -26,7 +26,7 @@ typedef struct RESPONSE
 	char response[OUTPUT_BUFFER_SIZE];						// answer sentences, 1 or more per input line
 } RESPONSE;
 
-
+#define SENTENCE_LIMIT 50 // how many sentence from user do we accept
 #define MAX_RESPONSE_SENTENCES 20
 #define MAX_SENTENCE_LENGTH 256 // room for +4 after content (keep a power of 4 for savesentence code)
 #define REAL_SENTENCE_LIMIT 252 // stay under char size boundary and leave excess room
@@ -181,7 +181,7 @@ unsigned int SaveTimedFunctions();
 void MainLoop();
 void FinishVolley(char* input,char* output,char* summary);
 unsigned int ProcessInput(char* input);
-FunctionResult DoSentence(char* prepassTopic);
+FunctionResult DoSentence(char* prepassTopic,bool atlimit);
 #ifdef DLL
 extern "C" __declspec(dllexport) int PerformChat(char* user, char* usee, char* incoming,char* ip,char* output);
 extern "C" __declspec(dllexport) int PerformChatGivenTopic(char* user, char* usee, char* incoming,char* ip,char* output,char* topic);
@@ -191,7 +191,7 @@ int PerformChatGivenTopic(char* user, char* usee, char* incoming,char* ip,char* 
 #endif
 void ResetSentence();
 void ResetToPreUser();
-void PrepareSentence(char* input,bool mark = true,bool user=true, bool analyze = false, bool oobstart = false);
+void PrepareSentence(char* input,bool mark = true,bool user=true, bool analyze = false, bool oobstart = false,bool atlimit = false);
 bool PrepassSentence(char* presspassTopic);
 FunctionResult Reply();
 void OnceCode(const char* var,char* topic = NULL);

@@ -10,7 +10,10 @@
 <body>
 <h1 id="chatscript-system-functions-manual">ChatScript System Functions Manual</h1>
 <blockquote>
-<p>© Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com Revision 8/13/2016 cs6.8</p>
+<p>© Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com</p>
+</blockquote>
+<blockquote>
+<p>Revision 9/25/2016 cs6.84</p>
 </blockquote>
 <ul>
 <li><a href="ChatScript-System-Functions-Manual.html#topic-functions">Topic Functions</a></li>
@@ -123,6 +126,8 @@ t: () name(xxx ) # explicitly add an empty pattern</code></pre>
 <p>If kind is output or copy and no tag is given or the tag is &quot;null&quot;, the output rejoinder is cleared (analogous to ^disable). If the kind is input and no tag is given or the tag is &quot;null&quot;, the input rejoinder is cleared.</p>
 <h3 id="topicflags-topic"><code>^topicflags</code>( <code>topic</code> )</h3>
 <p>Given a topic name, return the control bits for that topic. The bits are mapped in dictionary_system.h as <code>TOPIC_*</code>.</p>
+<h3 id="sleep-milliseconds"><code>^sleep</code>( <code>milliseconds</code> )</h3>
+<p>This stalls the engine for that many milliseconds. If this is a server, the server is unavailable until sleep is done. Use with care. A good use is when starting up a server instance and the boot process involves reading from an API. If your machine runs 30 instances of ChatScript launched at once (to use max CPU), then all of them hitting the same API at once may be bad for the API and forcing a randomized sleep based on processid is a good use.</p>
 <h1 id="marking-functions">Marking Functions</h1>
 <h3 id="mark-word-location"><code>^mark</code>( word location )</h3>
 <p>Marking and unmarking words and concepts is fundamental to the pattern matching mechanism, so the system provides both an automatic marking mechanism and manual override abilities. You can manually mark or unmark something.</p>
@@ -540,14 +545,9 @@ if ($$newtype == $$type AND match($$newrule)) # we would match this rule</code><
 ```
 which means copy the elements of set 19 into set 0.
 
-Note that `^return()` and `^return(null)` are not the same. An empty string is not completely
-the same as nuThe first passes an if test, and the second does not. For `^function` calling `^return()`
-```
-if ( ^function()) {this always works}
-```
-but for `^function` calling `^return(null)`</code></pre>
-<p>if (^function()) { # like a $var, this fails if the function returns null}</p>
-<pre><code>
+Note that `^return()` and `^return(null)` are treated the same. An empty string is returned. This is
+similar to assigning a variable by saying `$var = null` which assigns the empty string.
+
 
 ### `^addcontext`( topic label )
 Sets a topic and context name for use by `^incontext`. 
@@ -568,39 +568,20 @@ whether or not the rule generates output as long as it didn&#39;t fail during ou
 `^inContext` will return how many volleys have happened since the referenced rule (normal return) if
 the label has output within the 5 prior volleys and will fail if not. It&#39;s like an extension of
 rejoinders. Rejoinders have a 1 volley context and must be placed immediately after a
-rule. This has a 5 volley context and are used in normal rule patterns.</code></pre>
-<p>u: (^incontext(PLAYTENNIS) why) because it was fun.</p>
-<pre><code>
-
-
-# External Access Functions
-
-
-### `^system`( any number of arguments )
-The arguments, separated by spaces, are passed as a text string to the operating system for execution as a command. 
-The function always succeeds, returning the return code of the call. You can transfer data back and forth via
-files by using `^import` and `^export` of facts.
-
-### `^popen`( commandstring `&#39;function`)
-The command string is a string to pass the os shell
-to execute. That will return output strings (some number of them) which will have any `\r`
-or `\n` changed to blanks and then the string stripped of leading and trailing blanks. The
-string is then wrapped in double quotes so it looks like a standard ChatScript single
-argument string, and sent to the declared function, which must be an output macro or
-system function name, preceded by a quote. 
-The function can do whatever it wants. Any output it prints to the output buffer will be concatenated together 
-to be the output from ChatScript. If you need a doublequote in the command string, use a backslash in front of
-each one. 
-They will be removed prior to sending the command. E.g.,
+rule. This has a 5 volley context and are used in normal rule patterns.
 ```
-outputmacro: ^myfunc(^arg)
+u: (^incontext(PLAYTENNIS) why) because it was fun.</code></pre>
+<h1 id="external-access-functions">External Access Functions</h1>
+<h3 id="system-any-number-of-arguments"><code>^system</code>( any number of arguments )</h3>
+<p>The arguments, separated by spaces, are passed as a text string to the operating system for execution as a command. The function always succeeds, returning the return code of the call. You can transfer data back and forth via files by using <code>^import</code> and <code>^export</code> of facts.</p>
+<h3 id="popen-commandstring-function"><code>^popen</code>( commandstring <code>'function</code>)</h3>
+<p>The command string is a string to pass the os shell to execute. That will return output strings (some number of them) which will have any <code>\r</code> or <code>\n</code> changed to blanks and then the string stripped of leading and trailing blanks. The string is then wrapped in double quotes so it looks like a standard ChatScript single argument string, and sent to the declared function, which must be an output macro or system function name, preceded by a quote. The function can do whatever it wants. Any output it prints to the output buffer will be concatenated together to be the output from ChatScript. If you need a doublequote in the command string, use a backslash in front of each one. They will be removed prior to sending the command. E.g.,</p>
+<pre><code>outputmacro: ^myfunc(^arg)
 ^arg \n
 topic: ~test( testing )
-u: () popen( &quot;dir *.* /on&quot; &#39;^myfunc)
-```
-output this:
-```
-Volume in drive C is OS
+u: () popen( &quot;dir *.* /on&quot; &#39;^myfunc)</code></pre>
+<p>output this:</p>
+<pre><code>Volume in drive C is OS
 Volume Serial Number is 24CB-C5FC
 
 Directory of C:ChatScript
@@ -612,63 +593,23 @@ Directory of C:ChatScript
 05/08/2013 03:29 PM &lt;DIR&gt; DICT
 ...( additional lines omitted)
 49 File(s) 29,813,641 bytes
-24 Dir(s) 566,354,685,952 bytes free
-```
-
-`&#39;Function` can be null if you are not needing to look at output.
-
-
-### `^tcpopen`( kind url data `&#39;function` )
-Analogous in spirit to popen.  You name the `kind` of service (`POST`, `GET`), 
-the `url` (not including `http://`) but including any subdirectory, 
-the text string to send as data, and the quoted function in ChatScript you want to receive the answer. 
-The answer will be read as strings of text (newlines separate and are stripped off
-with carriage returns) and each string is passed in turn to your function which takes a
-single argument (that text). 
-
-`:trace TRACE_TCP` can be enabled to log what happens during the call.
-
-Likely you will prefer `^jsonopen` which can deal with more complex web
-communication scenarios and returns structured data so you don&#39;t have to write script
-yourself to parse the text.
-
-`&#39;function` can be `null` if you are not needing to look at output. 
-The system will set `$$tcpopen_error` with error information if this function fails.
-When you look at a webpage you often see it&#39;s url looking like this:
-```
-http://xml.weather.com/weather/local/4f33?cc=*&amp;unit =&quot;+vunit+&quot;&amp;dayf=7&quot;
-```
-There are three components to it. 
-
-The host: `xml.weather.com`. 
-
-The service or directory: `/weather/local/4f33`. 
-
-The arguments: everything AFTER the `?`. The arguments are URLencoded, so spaces have been replaced by `+`, 
-special characters will be converted to `%xx` hex numbers. 
-If there are multiple values, they will be separated by `&amp;` and the left side of
-an `=` is the argument name and the right side is the value. 
-
-When you call `^tcpopen`, normally you provide the host and service as a single argument (everything to the left
-of `?`) and the data as another argument (everything to the right of `?`).
-
-Since ChatScript URL encodes, you don&#39;t. If you don&#39;t know the unencoded form of the
-data or you don&#39;t think CS will get it right, you can provide URL-encoded data yourself,
-in which case make your first argument either `POSTU` or `GETU`, meaning you are
-supplying url-encoded data so CS should not do anything to your arguments.
-
-Below is sample code to find current conditions and temperature in san francisco if you
-have an api key to the service. It calls the service, gets back all the JSON formatted data
-from the request, and line by line passes it to `^myfunc`. 
-This, in turn, calls a topic to hunt selectively for fragments and save them, 
-and when all the fragments we want have been found, 
-`^myfunc` outputs a message and stops further processing by calling `^END(RULE)`.
-
-Note that in this example there is no data to pass, everything is in the service named, so
-the data value is &quot;&quot;.
-
-```
-outputmacro: ^myfunc (^value)
+24 Dir(s) 566,354,685,952 bytes free</code></pre>
+<p><code>'Function</code> can be null if you are not needing to look at output.</p>
+<h3 id="tcpopen-kind-url-data-function"><code>^tcpopen</code>( kind url data <code>'function</code> )</h3>
+<p>Analogous in spirit to popen. You name the <code>kind</code> of service (<code>POST</code>, <code>GET</code>), the <code>url</code> (not including <code>http://</code>) but including any subdirectory, the text string to send as data, and the quoted function in ChatScript you want to receive the answer. The answer will be read as strings of text (newlines separate and are stripped off with carriage returns) and each string is passed in turn to your function which takes a single argument (that text).</p>
+<p><code>:trace TRACE_TCP</code> can be enabled to log what happens during the call.</p>
+<p>Likely you will prefer <code>^jsonopen</code> which can deal with more complex web communication scenarios and returns structured data so you don't have to write script yourself to parse the text.</p>
+<p><code>'function</code> can be <code>null</code> if you are not needing to look at output. The system will set <code>$$tcpopen_error</code> with error information if this function fails. When you look at a webpage you often see it's url looking like this:</p>
+<pre><code>http://xml.weather.com/weather/local/4f33?cc=*&amp;unit =&quot;+vunit+&quot;&amp;dayf=7&quot;</code></pre>
+<p>There are three components to it.</p>
+<p>The host: <code>xml.weather.com</code>.</p>
+<p>The service or directory: <code>/weather/local/4f33</code>.</p>
+<p>The arguments: everything AFTER the <code>?</code>. The arguments are URLencoded, so spaces have been replaced by <code>+</code>, special characters will be converted to <code>%xx</code> hex numbers. If there are multiple values, they will be separated by <code>&amp;</code> and the left side of an <code>=</code> is the argument name and the right side is the value.</p>
+<p>When you call <code>^tcpopen</code>, normally you provide the host and service as a single argument (everything to the left of <code>?</code>) and the data as another argument (everything to the right of <code>?</code>).</p>
+<p>Since ChatScript URL encodes, you don't. If you don't know the unencoded form of the data or you don't think CS will get it right, you can provide URL-encoded data yourself, in which case make your first argument either <code>POSTU</code> or <code>GETU</code>, meaning you are supplying url-encoded data so CS should not do anything to your arguments.</p>
+<p>Below is sample code to find current conditions and temperature in san francisco if you have an api key to the service. It calls the service, gets back all the JSON formatted data from the request, and line by line passes it to <code>^myfunc</code>. This, in turn, calls a topic to hunt selectively for fragments and save them, and when all the fragments we want have been found, <code>^myfunc</code> outputs a message and stops further processing by calling <code>^END(RULE)</code>.</p>
+<p>Note that in this example there is no data to pass, everything is in the service named, so the data value is &quot;&quot;.</p>
+<pre><code>outputmacro: ^myfunc (^value)
 
 $$tmp = ^value
 nofail(RULE respond(~tempinfo))
@@ -702,13 +643,9 @@ u: (weather)
     if ( tcpopen(GET api.wunderground.com/api/yourkey/conditions/q/CA/San_Francisco.json &quot;&quot; &#39;^myfunc)) 
         { hi }
     else 
-        {$$tcpopen_error}
-```
-
-There is a subtlety in the `^myfunc` code in that it uses ^print to put out the result. Just
-writing:
-```
-if ($$currentCondition AND $$currentTEMP)
+        {$$tcpopen_error}</code></pre>
+<p>There is a subtlety in the <code>^myfunc</code> code in that it uses ^print to put out the result. Just writing:</p>
+<pre><code>if ($$currentCondition AND $$currentTEMP)
     { 
     It is $$currentCondition.
     The temperature is $$currentTemp.
@@ -777,6 +714,8 @@ else {$$tcpopen_error}</code></pre>
 <p><code>^Jsonpath</code> can also return the actual factid of the match, instead of the object of the fact. This would allow you to see the index of a found array element, or the json object/array name involved. Or you could use <code>^revisefact</code> to change the specific value of that fact (not creating a new fact). Just add <code>*</code> after your final path, eg</p>
 <pre><code>^jsonpath(.name* $$obj)
 ^jsonpath(.name[4]* $$obj)</code></pre>
+<p>If you need to handle the full range of legal keys in json, you can use text string notation like this</p>
+<pre><code>^jsonpath(.&quot;st. helen&quot;.data $tmp)</code></pre>
 <h1 id="word-manipulation-functions">Word Manipulation Functions</h1>
 <h3 id="burst-count-once-data-source-burst-character-string"><code>^burst</code>( {count once} data-source burst-character-string )</h3>
 <p>Takes the data source text and hunts within it for instances of the burst-character-string. If it is being dumped to the output stream then only the first piece is dumped. If it is being assigned to a fact set (like <code>@2</code>) then a series of transient facts are created for the pieces, with the piece as the subject and <code>^burst</code> <code>^burst</code> as the verb and object. If it is being assigned to a match variable, then pieces are assigned starting at that variable and moving on to successively higher ones.</p>
@@ -796,7 +735,7 @@ else {$$tcpopen_error}</code></pre>
 <p>Return the substring with the designated offset range (exclusive of end location). Useful for data extraction using ^popen and ^tcpopen when combined with <code>^findtext</code>.</p>
 <p>In addition to absolute unsigned values, start and end can take on offsets or relative values. A signed end is a length to extract plus a direction or shift in start. <code>^extract($$source 5 +2) to extract 2 characters beginning at position 5</code> <code>^extract($$source 5 -2) to extract 2 characters ending at position 5</code> A negative start is a backwards offset from end. <code>^extract($$source -1 +1) from end, 1 character before and get 1 character</code> <code>^extract($$source -5 -1) from end, 5 characters before and get 1 character before          i.e. the 6th char from end</code></p>
 <h3 id="findtext-source-substring-offset-insensitive"><code>^findtext</code>( source substring offset {insensitive} )</h3>
-<p>Find case sensitive substring within source+offset and return offset starting immediately after match. Useful for data extraction using <code>^popen</code> and <code>^tcpopen</code> when combined with <code>^extract</code>. <code>$$findtext_start</code> is bound to the actual start of the match.</p>
+<p>Find case sensitive substring within source+offset and return offset starting immediately after match. Useful for data extraction using <code>^popen</code> and <code>^tcpopen</code> when combined with <code>^extract</code>. <code>$$findtext_start</code> is bound to the actual start of the match. <code>$$findtext_word</code> is bound to the word index in which the match was found where one or more blanks separate words. Indexing starts at 1 (same as sentence positional notation).</p>
 <p>An optional fourth argument <code>insensitive</code> will match insensitively. Failing to match will generate a rule failure. If the source or substring contains an <code>_</code>, these will be converted to blanks before execution, to allow that or the space notation to be considered equivalent (unless your source or substring is literally an underscore only.</p>
 <h3 id="flags-word"><code>^flags</code>( word )</h3>
 <p>get the 64bit systemflags of a word.</p>
@@ -804,6 +743,10 @@ else {$$tcpopen_error}</code></pre>
 <p>Given two &quot;sentences&quot;, finds words in common in both of them. Output facts will go to the set assigned to, or <code>@0</code> if not an assignment statement. The optional third argument, if it's <code>canonical</code>, it will match the canonical forms of each word.</p>
 <h3 id="join-any-number-of-arguments"><code>^join</code>( any number of arguments )</h3>
 <p>Concatenates them all together, putting the result into the output stream. If the first argument is <code>AUTOSPACE</code>, it will put a single space between each of the joined arguments automatically.</p>
+<h3 id="actualinputrange-start-end"><code>^actualinputrange</code>( start end )</h3>
+<p>Given the starting and ending word positions of an original input (what CS had after tokenization but before adjustments), this returns the range of where the words arose in the actual input. The return is a range whose start is shifted 8 bits left and ORed with the end position.</p>
+<h3 id="originalinputrange-start-end"><code>^originalinputrange</code>( start end )</h3>
+<p>Given the starting and ending word positions of an actual input (what CS sees after adjustments and what you normally pattern match on), this returns the range of where the words came from in the original input. The return is a range whose start is shifted 8 bits left and ORed with the end position.</p>
 <h3 id="properties-word"><code>^properties</code>( word )</h3>
 <p>Returns the 64bit properties of a word or fail-rule if the word is not already in the dictionary.</p>
 <h3 id="pos-part-of-speech-word-supplemental-data"><code>^pos</code>( part-of-speech word supplemental-data )</h3>

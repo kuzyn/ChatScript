@@ -1,4 +1,21 @@
-version 6.83
+version 6.84 9/25/2016
+1. supports json path argument with string for key so you can do ^jsonpath(."st. helens".data $$x)
+2. dotted notation supports $x.y.z and $x.y.z = 
+3. findtext now also returns $$findtext_word which is what word it was found at
+4. ^actualinputrange(start end) from ^original data, naming a range of words, what actual words are covered
+	returns range (begin<<16) | end
+5. ^sleep
+6. ^originalinputrange(start end) from ^actual data, naming a range of words, what original words generated it
+	returns range (begin<<16) | end
+7. command line paramter login=   (documented in advanced manual)
+8. ^return(null) now made to be equivalent to ^return() to avoid errors
+9. ^jsonopen(direct - returns the read text directly to the answer, rather than converting to json facts
+10. %pid - process id
+11. encryption, encrypt=  decrypt=    command line parameter (documented in clients and servers manual under encryption)
+12. :time (performance measurement) documented in debugging manual
+13. bootcmd=  command line parameter executed before CSBOOT is run (if it is run) (documented in advanced manual)
+
+version 6.83 9/11/2016
 1. ^extract now also takes signed arguments to perform relative or backwards extractions,
 	eg 	($$source 5 +2) to extract 2 characters beginning at position 5
 		($$source 5 -2) to extract 2 characters ending at position 5
@@ -10,9 +27,6 @@ version 6.83
 5. Full wiki documentation up-to-date, with HTMLDocumentation folder corresponding. I have not
 	proofread the wiki or html, so it may have minor glitches still.
 	PDFDocumentation not generated from Wiki yet (manually updated).
-Undocumented, pending for next release
-	5. :time for measuring performance
-	6. encryption capability for read/write of user topic and ltm files
 	7. boottrace param to request trace over a startup boot loading of data
 	8. proofread of all documentation
 

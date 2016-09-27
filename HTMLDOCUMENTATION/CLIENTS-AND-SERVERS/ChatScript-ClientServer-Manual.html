@@ -10,7 +10,10 @@
 <body>
 <h1 id="chatscript-clientserver-manual">ChatScript Client/Server Manual</h1>
 <blockquote>
-<p>© Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com Revision 7/31/2016 cs6.7a</p>
+<p>© Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com</p>
+</blockquote>
+<blockquote>
+<p>Revision 9/25/2016 cs6.84</p>
 </blockquote>
 <ul>
 <li><a href="ChatScript-ClientServer-Manual.html#running-the-server">Running the server</a></li>
@@ -29,6 +32,7 @@
 <li><a href="ChatScript-ClientServer-Manual.html#command-authorization">Command Authorization</a></li>
 <li><a href="ChatScript-ClientServer-Manual.html#command-line-parameters">Command line parameters</a></li>
 <li><a href="ChatScript-ClientServer-Manual.html#restful-server">RESTful server</a></li>
+<li><a href="ChatScript-ClientServer-Manual.html#encrption">Encryption</a></li>
 </ul>
 <p>While the system defaults to running as a stand-alone chatbot under Windows, when run under LINUX it defaults to being a server.</p>
 <p>Nominally (meaning depending on hardware and what your bot does) ChatScript can process a volley on a single core in 10 milliseconds on a slow machine, thus handling 100 volleys every second from different users using one core. A human-human volley is often around 15 seconds, so handling 1000 simultaneous users with a single core slow server is not unreasonable.</p>
@@ -199,5 +203,16 @@ The server app, on receiving the ChatScript output, may need to send it over to 
 <li><p>Write out any user variables you care about. You may not care about the random seed or turn number, or you can write them out as well.</p></li>
 <li><p>Currently there is no interface to context data so you can't write that out. Generally all this will be written out by a post-process phase.</p></li>
 </ol>
+<h1 id="encryption">Encryption</h1>
+<p>ChatScript normally reads and writes everything in plain text. If you need greater security then you need to do several things.</p>
+<ol style="list-style-type: decimal">
+<li><p>turn off server logs and user logs</p></li>
+<li><p>Use encrypt= and decrypt= command line parameters.</p></li>
+<li><p>Use default system or roll your own encryption in privatecode.</p></li>
+</ol>
+<p>Encryption applies to user topic files and long term memory files (^export and ^import). The built-in encryption method calls an external api server using json to perform encryption and decryption, passing the server urls provided by encrypt= and decrypt= command line parameters. The routines will add in the user's login id if you use %s in the command line parameters. Eg.,</p>
+<p>encrypt=http://someapi/someotherdata/%s decrypt=http://someapi/%s/something</p>
+<p>Where %s goes depends on the api you call.</p>
+<p>To roll your own, you have to define routines in private code that encrypt and decrypt (see examples in os.cpp) and on private initialization override the default variables controlling userFileSystem.encrypt and userFileSystem.decrypt.</p>
 </body>
 </html>

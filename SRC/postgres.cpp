@@ -323,8 +323,6 @@ void PGUserFilesCode()
 	userFileSystem.userRead = pguserRead;
 	userFileSystem.userWrite = pguserWrite;
 	userFileSystem.userDelete = NULL;
-	userFileSystem.userDecrypt = NULL;
-	userFileSystem.userEncrypt = NULL;
 	filesystemOverride = POSTGRESFILES;
 	
 // user file table

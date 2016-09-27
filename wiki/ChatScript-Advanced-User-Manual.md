@@ -1,7 +1,8 @@
 # ChatScript Advanced User's Manual
 
 > © Bruce Wilcox, gowilcox@gmail.com brilligunderstanding.com 
-> Revision 8/13/2016 cs6.8
+
+> Revision 9/25/2016 cs6.84
 
 * [Review](ChatScript-Advanced-User-Manual.md#review-overview-of-how-cs-works)
 * [Advanced Concepts](ChatScript-Advanced-User-Manual.md#advanced-concepts)
@@ -99,9 +100,11 @@ the active string implicitly invokes the equivalent of sprintf.
 
 User variables also come in permanent and transient forms. 
 **Permanent variables** start with a single `$` and are preserved across user interactions 
-(are saved and restored from disk). 
+(are saved and restored from disk). You can see and alter their value from anywhere.
 **Transient variables** start with `$$` and completely disappear when a user interaction
-happens (are not saved to disk).
+happens (are not saved to disk). You can see and alter their value from anywhere.
+**Local variables** (described later) start with `$_` and completely disappear when a user interaction
+happens (are not saved to disk). You can see and alter their value only within the topic or outputmacro they are used.
 
 
 ### Facts 
@@ -1601,10 +1604,8 @@ which you might return.
 $$tmp = 25
 ```
 doesn't work. It wipes out the $washing value of `$$tmp` and replaces it with `25`.
-You can set indirectly through `$$tmp` using function notation `^`, e.g.
-```
-^$$tmp = 25
-```
+
+You can set indirectly through `$$tmp` using function notation `^$$tmp`
 The above says take the value of `$$tmp`, treat it as the name of a variable, 
 and assign into it. Which means it does the equivalent of
 ```
@@ -1666,6 +1667,17 @@ _0 = _10
 ```
 This is a transfer from one match variable to another, so no data is lost
 
+
+## Json dotted notation for variables
+If a variable holds a JSON object value, you can directly set and get from fields of that object
+using dotted notation. This must be a fixed static fieldname you give- `$myvar.$myfield` is illegal.
+Dotted notation is cleaner and faster than `^jsonpath` and `jsonobjectinsert` and for get, has
+the advantage that it never fails, it only returns null if it can't find the field. 
+On the other hand, assignment fails if the path does not contain a json object at some level.
+```
+$x = $$$obj.name.value.data.side 
+$$$obj.name.value.data.side = 7
+```
 
 # Out of band Communication
 
@@ -2580,7 +2592,7 @@ to have enough normal working room.
 
 ## Output options
 
-`output=nnn` limits output line length for a bot to that amount (forcing \r\n as needed). 0
+`output=nnn` limits output line length for a bot to that amount (forcing crnl as needed). 0
 is unlimited.
 
 
@@ -2611,17 +2623,18 @@ Overridden if the user has `$cs_userfactlimit` set to some value.
 <br>`nouserlog` - Don't store a user-bot log.
 <br>`login=xxxx` - The same as you would name when asked for a login, this avoids having
 to ask for it. Can be `login=george` or `login=george:harry` or whatever.
-
-`build0=filename` runs `:build` on the filename as level0 and exits with 0 on success or 4 on
+<br>``build0=filename` runs `:build` on the filename as level0 and exits with 0 on success or 4 on
 failure.
 <br>`build1=filename` runs :build on the filename as level1 and exits with 0 on success or 4 on
 failure. Eg. ChatScript `build0=files0.txt` will rebuild the usual level 0.
-
-`debug=:xxx` xxx runs the given debug command and then exits. 
+<br>``debug=:xxx` xxx runs the given debug command and then exits. 
 Useful for `:trim`, for example or more specific `:build` commands.
-
-`param=xxxxx` data to be passed to your private code
-
+<br>``param=xxxxx` data to be passed to your private code
+<br>``login=xxxxx` initial user id (bypass asking you for user)
+<br>``encrypt=xxxxx` data evailable to encrpytion code
+<br>``decrypt=xxxxx` data evailable to decrpytion code
+<br>``bootcmd=xxx` runs this command string before CSBOOT is run
+	use it to trace the boot process
 
 ## Bot variables
 
